@@ -468,7 +468,7 @@ layer {
   }
   convolution_param {
 	engine: CAFFE
-    num_output: 320
+    num_output: 7
     pad: 1
     kernel_size: 3
     stride: 1

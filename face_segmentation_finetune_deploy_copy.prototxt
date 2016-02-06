@@ -404,7 +404,7 @@ layer {
   }
   convolution_param {
 	engine: CAFFE
-    num_output: 7
+    num_output: 320
     pad: 1
     kernel_size: 3
     stride: 1
@@ -538,14 +538,14 @@ layer {
 layer { 
 	name: "crop2" 
 	type: "Crop"
-	bottom: "score4"
 	bottom: "score-pool6" 
+	bottom: "score4"
 	top: "score-pool6c" 
 }
 layer { 
 	name: "fuse2" 
 	type: "Eltwise" 
-	bottom: "score-pool6" 
+	bottom: "score4" 
 	bottom: "score-pool6c"
 	top: "score-final"
 	eltwise_param { 
