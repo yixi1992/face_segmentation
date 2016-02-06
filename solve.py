@@ -20,7 +20,7 @@ def interp_surgery(net, layers):
     for l in layers:
         m, k, h, w = net.params[l][0].data.shape
         if m != k:
-            print 'input + output channels need to be the same'
+            print 'input + output channels need to be the same\nlayer=%s m=%i k=%i h=%i w=%i' % (l,m,k,h,w)
             raise
         if h != w:
             print 'filters need to be square'
