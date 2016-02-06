@@ -62,7 +62,7 @@ def test_accuracy(model_file):
 iter = range(5, 14040,5)
 model_acc = np.zeros(len(iter))
 for idx,i in enumerate(iter):
-	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__'+str(i)+'.caffemodel.h5'
+	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i)+'.caffemodel.h5'
 	if not os.path.exists('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i))] + '/'):
 		os.makedirs('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i))] + '/')
 	model_acc[idx] = test_accuracy(model_file)
