@@ -9,7 +9,7 @@ input_dim: 100
 
 
 layer {
-  name: "conv1"
+  name: "conv1-rename"
   type: "Convolution"
   bottom: "data"
   top: "conv1"
@@ -390,7 +390,7 @@ layer {
   top: "conv13"
 }
 layer {
-  name: "conv14"
+  name: "conv14-rename"
   type: "Convolution"
   bottom: "conv13"
   top: "conv14"
