@@ -38,7 +38,7 @@ base_weights = '../image+jit2d+illum+rot3d/snapshots/snapshot_janus_baseline_ite
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
-solver = caffe.SGDSolver('solver.prototxt')
+solver = caffe.SGDSolver('face_segmentation_finetune_solver.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
 interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
