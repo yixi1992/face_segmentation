@@ -12,8 +12,8 @@ Rwidth=100
 LabelHeight=100
 LabelWidth=100
 
-#dataset='Train'
-dataset='Test'
+dataset='Train'
+#dataset='Test'
 image_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/*.bmp'
 image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
@@ -59,18 +59,18 @@ def test_accuracy(model_file):
 
 
 
-iter = range(5, 14040,5)
+iter = range(1, 3550, 1)
 model_acc = np.zeros(len(iter))
 for idx,i in enumerate(iter):
-	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i)+'.caffemodel.h5'
-	if not os.path.exists('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i))] + '/'):
-		os.makedirs('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-3__iter_'+str(i))] + '/')
+	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-10__iter_'+str(i)+'.caffemodel.h5'
+	if not os.path.exists('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-10__iter_'+str(i))] + '/'):
+		os.makedirs('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):len('snapshots/snapshot_face_segmentation_finetune_fixlr1e-10__iter_'+str(i))] + '/')
 	model_acc[idx] = test_accuracy(model_file)
 	#
 	plt.clf()
 	plt.plot(model_acc[:(idx+1)])
 	plt.ylabel('accuracy')
 	plt.title('accuracy on '+dataset)
-	plt.savefig('test_accuracy_fixlr1e-3.png')
+	plt.savefig(dataset+'_accuracy_fixlr1e-10.png')
 	
 
