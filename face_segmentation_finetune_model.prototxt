@@ -12,9 +12,11 @@ layer {
         batch_size: 10
         backend: LMDB
   }
-#  transform_param {
-#  	mean_file: "/lustre/yixi/origin_mean.binaryproto"
-#  }
+  transform_param {
+  	mean_value: 106.1313
+	mean_value: 84.3670
+	mean_value: 69.8753
+  }
 }
 layer {
   name: "label"
@@ -46,10 +48,11 @@ layer {
 	batch_size: 10
 	backend: LMDB
   }
-#  transform_param {
-#  	mean_file: "/lustre/yixi/origin_mean.binaryproto"
-#  }
-
+  transform_param {
+  	mean_value: 106.1313
+	mean_value: 84.3670
+	mean_value: 69.8753
+  }
 }
 layer {
   name: "label"
@@ -63,11 +66,8 @@ layer {
 	batch_size: 10
 	backend: LMDB
   }
-#  transform_param {
-#  	mean_value: 0
-#  }
-}
 
+}
 
 
 
