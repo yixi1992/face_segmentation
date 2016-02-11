@@ -12,8 +12,8 @@ Rwidth=100
 LabelHeight=100
 LabelWidth=100
 
-dataset='Train'
-#dataset='Test'
+#dataset='Train'
+dataset='Test'
 image_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/*.bmp'
 image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
@@ -42,6 +42,7 @@ def test_accuracy(model_file):
 		# run net and take argmax for prediction
 		net.forward()
 		out = net.blobs['score'].data[0].argmax(axis=0)
+		out=np.array(out, dtype=np.uint8)
 		#
 		scipy.misc.imsave('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):(len(model_file)-len('.caffemodel.h5'))] + '/pred_' + dataset + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))]+ '.png', out)
 		#
