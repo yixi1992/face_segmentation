@@ -12,8 +12,8 @@ Rwidth=100
 LabelHeight=100
 LabelWidth=100
 
-#dataset='Train'
-dataset='Test'
+dataset='Train'
+#dataset='Test'
 image_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/*.bmp'
 image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
@@ -31,7 +31,7 @@ def test_accuracy(model_file):
 		#
 		im = np.array(im, dtype=np.float32)
 		in_ = im
-		in_ -= np.array((0,0,0))
+		in_ -= np.array((106.1313, 84.3670, 69.8753))
 		in_ = in_.transpose((2,0,1))
 		#
 		# load net
@@ -59,7 +59,7 @@ def test_accuracy(model_file):
 
 
 
-iter = range(5, 62975, 100)
+iter = range(10, 62975, 1000)
 model_acc = np.zeros(len(iter))
 for idx,i in enumerate(iter):
 	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-8__iter_'+str(i)+'.caffemodel.h5'
