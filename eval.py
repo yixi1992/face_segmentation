@@ -12,8 +12,8 @@ Rwidth=100
 LabelHeight=100
 LabelWidth=100
 
-dataset='Train'
-#dataset='Test'
+#dataset='Train'
+dataset='Test'
 image_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/*.bmp'
 image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
@@ -43,7 +43,7 @@ def test_accuracy(model_file):
 		net.forward()
 		out = net.blobs['score'].data[0].argmax(axis=0)
 		#
-		scipy.misc.imsave('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):(len(model_file)-len('.caffemodel.h5'))] + '/pred_' + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))]+ '.png', out)
+		scipy.misc.imsave('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):(len(model_file)-len('.caffemodel.h5'))] + '/pred_' + dataset + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))]+ '.png', out)
 		#
 		L = np.array(Image.open(label_dir + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))] + label_suffix)) # or load whatever ndarray you need
 		Dtype = L.dtype
@@ -59,7 +59,7 @@ def test_accuracy(model_file):
 
 
 
-iter = range(62970, 62975, 5)
+iter = range(5, 62975, 100)
 model_acc = np.zeros(len(iter))
 for idx,i in enumerate(iter):
 	model_file = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-8__iter_'+str(i)+'.caffemodel.h5'
