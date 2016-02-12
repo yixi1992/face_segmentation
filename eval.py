@@ -19,6 +19,8 @@ image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
 label_suffix = '.png'
 
+work_dir='/lustre/yixi/face_segmentation_finetune/'
+
 def test_accuracy(model_file):
 	acc = np.zeros(len(image_files))
 	for idx,image_file in enumerate(image_files):
@@ -35,7 +37,7 @@ def test_accuracy(model_file):
 		in_ = in_.transpose((2,0,1))
 		#
 		# load net
-		net = caffe.Net('face_segmentation_finetune_deploy.prototxt', model_file, caffe.TEST)
+		net = caffe.Net(work_dir+'face_segmentation_finetune_deploy.prototxt', model_file, caffe.TEST)
 		# shape for input (data blob is N x C x H x W), set data
 		net.blobs['data'].reshape(1, *in_.shape)
 		net.blobs['data'].data[...] = in_
@@ -44,7 +46,7 @@ def test_accuracy(model_file):
 		out = net.blobs['score'].data[0].argmax(axis=0)
 		out=np.array(out, dtype=np.uint8)
 		#
-		scipy.misc.imsave('pred_visual/'+model_file[len('snapshots/snapshot_face_segmentation_finetune_'):(len(model_file)-len('.caffemodel.h5'))] + '/pred_' + dataset + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))]+ '.png', out)
+		scipy.misc.imsave(work_dir+'pred_visual/'+model_file[len(work_dir+'snapshots/snapshot_face_segmentation_finetune_'):(len(model_file)-len('.caffemodel.h5'))] + '/pred_' + dataset + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))]+ '.png', out)
 		#
 		L = np.array(Image.open(label_dir + image_file[len('/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/'):(len(image_file)-len('.bmp'))] + label_suffix)) # or load whatever ndarray you need
 		Dtype = L.dtype
@@ -65,8 +67,8 @@ model_acc = np.zeros(len(iter))
 version = 'fixlr1e-8_62970+71300_lr1e-9_71400+'
 #snapshots/snapshot_face_segmentation_finetune_fixlr1e-8_62970+71300_lr1e-9_71400+_iter_70900.caffemodel.h5
 for idx,i in enumerate(iter):
-	model_file = 'snapshots/snapshot_face_segmentation_finetune_'+version+'_iter_'+str(i)+'.caffemodel.h5'
-	pred_visual_dir = 'pred_visual/'+version+'_iter_'+str(i)+'/'
+	model_file = work_dir+'snapshots/snapshot_face_segmentation_finetune_'+version+'_iter_'+str(i)+'.caffemodel.h5'
+	pred_visual_dir = work_dir+'pred_visual/'+version+'_iter_'+str(i)+'/'
 	if not os.path.exists(pred_visual_dir):
 		os.makedirs(pred_visual_dir)
 	model_acc[idx] = test_accuracy(model_file)
@@ -75,6 +77,6 @@ for idx,i in enumerate(iter):
 	plt.plot(model_acc[:(idx+1)])
 	plt.ylabel('accuracy')
 	plt.title('accuracy on '+dataset)
-	plt.savefig(dataset+'_accuracy_'+version+'.png')
+	plt.savefig(work_dir+dataset+'_accuracy_'+version+'.png')
 	
 
