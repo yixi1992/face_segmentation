@@ -60,9 +60,10 @@ def test_accuracy(model_file):
 
 
 
-iter = range(100, 71350, 1000)
+iter = range(100, 70901, 100)
 model_acc = np.zeros(len(iter))
-version = 'fixlr1e-8_62970+'
+version = 'fixlr1e-8_62970+71300_lr1e-9_71400+'
+#snapshots/snapshot_face_segmentation_finetune_fixlr1e-8_62970+71300_lr1e-9_71400+_iter_70900.caffemodel.h5
 for idx,i in enumerate(iter):
 	model_file = 'snapshots/snapshot_face_segmentation_finetune_'+version+'_iter_'+str(i)+'.caffemodel.h5'
 	pred_visual_dir = 'pred_visual/'+version+'_iter_'+str(i)+'/'
