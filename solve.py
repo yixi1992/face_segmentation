@@ -32,7 +32,10 @@ def interp_surgery(net, layers):
 # a fully convolutional VGG16 net.
 # http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
 # base_weights = 'vgg16fc.caffemodel'
-base_weights = '../image+jit2d+illum+rot3d/snapshots/snapshot_janus_baseline_iter_401000.caffemodel.h5'
+#base_weights = '../image+jit2d+illum+rot3d/snapshots/snapshot_janus_baseline_iter_401000.caffemodel.h5'
+#base_weights = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-8__iter_62970.caffemodel.h5'
+#base_weights = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-8_62970+_iter_71300.caffemodel.h5'
+base_weights = 'snapshots/snapshot_face_segmentation_finetune_fixlr1e-8_62970+71300_lr1e-9__iter_71400.caffemodel.h5'
 
 # init
 caffe.set_mode_gpu()
@@ -41,8 +44,8 @@ caffe.set_device(0)
 solver = caffe.SGDSolver('face_segmentation_finetune_solver.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
-interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-interp_surgery(solver.net, interp_layers)
+#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+#interp_surgery(solver.net, interp_layers)
 
 # copy base weights for fine-tuning
 solver.net.copy_from(base_weights)
