@@ -12,8 +12,8 @@ Rwidth=100
 LabelHeight=100
 LabelWidth=100
 
-dataset='Train'
-#dataset='Test'
+#dataset='Train'
+dataset='Test'
 image_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_RGB/*.bmp'
 image_files = sorted(glob.glob(image_dir))
 label_dir='/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/'+dataset+'_Labels/labels/'
@@ -64,7 +64,8 @@ def test_accuracy(model_file):
 
 iter = range(100, 70901, 100)
 model_acc = np.zeros(len(iter))
-version = 'fixlr1e-8_62970+71300_lr1e-9_71400+'
+version = 'fixlr1e-8_62970+71300_lr1e-9_71400+70900_lr1e-10_'
+#fixlr1e-8_62970+71300_lr1e-9_71400+70900_lr1e-10_
 #snapshots/snapshot_face_segmentation_finetune_fixlr1e-8_62970+71300_lr1e-9_71400+_iter_70900.caffemodel.h5
 for idx,i in enumerate(iter):
 	model_file = work_dir+'snapshots/snapshot_face_segmentation_finetune_'+version+'_iter_'+str(i)+'.caffemodel.h5'
