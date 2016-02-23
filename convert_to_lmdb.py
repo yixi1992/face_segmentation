@@ -11,7 +11,7 @@ import scipy.io as sio
 import scipy
 import sys
 import os
-
+import shutil
 
 resize = True
 NumberTrain = 20 # Number of Training Images
@@ -60,13 +60,13 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 	
 	
 	
-
-
+if not os.path.exists(lmdb_dir):
+		os.makedirs(lmdb_dir)
+else:
+	shutil.rmtree(lmdb_dir, ignore_errors=True)
 ############################# Creating LMDB for Training Data ##############################
 
 print("Creating Training Data LMDB File ..... ")
-if not os.path.exists(lmdb_dir):
-		os.makedirs(lmdb_dir)
 
 in_db = lmdb.open(os.path.join(lmdb_dir,'train-lmdb'), map_size=int(1e14))
 createLMDB(in_db, inputs_Train, resize)
