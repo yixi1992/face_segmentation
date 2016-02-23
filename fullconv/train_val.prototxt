@@ -6,10 +6,17 @@ layer {
   include {
     phase: TRAIN
   }
+ # Pascal Context Mean
+ # transform_param {
+ #   mean_value: 104.00699
+ #   mean_value: 116.66877
+ #   mean_value: 122.67892
+ # }
+ #  Camvid Mean
   transform_param {
-    mean_value: 104.00699
-    mean_value: 116.66877
-    mean_value: 122.67892
+    mean_value: 99.1120
+    mean_value: 102.4847
+    mean_value: 104.5496
   }
   data_param {
     source: "../camvid_lmdb/train-lmdb"
@@ -37,10 +44,17 @@ layer {
   include {
     phase: TEST
   }
+   # Pascal Context Mean
+ # transform_param {
+ #   mean_value: 104.00699
+ #   mean_value: 116.66877
+ #   mean_value: 122.67892
+ # }
+ #  Camvid Mean
   transform_param {
-    mean_value: 104.00699
-    mean_value: 116.66877
-    mean_value: 122.67892
+    mean_value: 99.1120
+    mean_value: 102.4847
+    mean_value: 104.5496
   }
   data_param {
     source: "../camvid_lmdb/test-lmdb"
