@@ -60,10 +60,10 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 	
 	
 	
-if not os.path.exists(lmdb_dir):
-		os.makedirs(lmdb_dir)
-else:
+if os.path.exists(lmdb_dir):
 	shutil.rmtree(lmdb_dir, ignore_errors=True)
+os.makedirs(lmdb_dir)
+	
 ############################# Creating LMDB for Training Data ##############################
 
 print("Creating Training Data LMDB File ..... ")
