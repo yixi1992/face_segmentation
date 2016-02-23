@@ -40,7 +40,7 @@ if False:
 if True:
 	lmdb_dir = 'camvid_lmdb'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
-	train_label_data = '/lustre/yixi/data/CamVid/label/{id}_L.png'
+	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabels/{id}_L.png'
 	
 	inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
 	shuffle(inputs_Train)
@@ -48,8 +48,6 @@ if True:
 	inputs_Train = inputs_Train[NumberTest:]
 	inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
 	inputs_Test_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Test]
-
-	
 
 
 
