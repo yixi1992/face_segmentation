@@ -13,15 +13,13 @@ import sys
 import os
 import shutil
 
-resize = False
-NumberTrain = 20 # Number of Training Images
+resize = True
+# NumberTrain = 20 # Number of Training Images
 NumberTest = 50 # Number of Testing Images
-Rheight = 100 # Required Height
-Rwidth = 100 # Required Width
-RheightLabel = 100 # Height for the label
-RwidthLabel = 100 # Width for the label
-LabelWidth = 100 # Downscaled width of the label
-LabelHeight = 100 # Downscaled height of the label
+Rheight = 224 # Required Height
+Rwidth = 224 # Required Width
+LabelWidth = 224 # Downscaled width of the label
+LabelHeight = 224 # Downscaled height of the label
 
 
 if False:
