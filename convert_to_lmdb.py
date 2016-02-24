@@ -38,7 +38,7 @@ if False:
 if True:
 	lmdb_dir = 'camvid_lmdb'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
-	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabels/{id}_L.png'
+	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	
 	inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
 	shuffle(inputs_Train)
@@ -53,7 +53,7 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, in_) in inputs_Train:
 			im = np.array(Image.open(in_))
-			print in_idx, in_
+#			print in_idx, in_
 			Dtype = im.dtype
 			if not isLabel:
 				im = im[:,:,::-1]	# reverse channels of image data
@@ -63,6 +63,7 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 					im = im.resize([Rheight, Rwidth], Image.ANTIALIAS)
 				else:
 					im = im.resize([LabelHeight, LabelWidth],Image.NEAREST)
+					print(np.amax(im))
 			im = np.array(im,Dtype)     
 			if isLabel:
 				im = im.reshape(im.shape[0],im.shape[1],1)
@@ -82,7 +83,7 @@ os.makedirs(lmdb_dir)
 
 print("Creating Training Data LMDB File ..... ")
 
-in_db = lmdb.open(os.path.join(lmdb_dir,'train-lmdb'), map_size=int(1e12))
+in_db = lmdb.open(os.path.join(lmdb_dir,'train-lmdb'), map_size=int(1e14))
 createLMDB(in_db, inputs_Train, resize)
 
  
@@ -98,7 +99,7 @@ createLMDB(in_db, inputs_Train_Label, resize, isLabel=True)
 
 print("Creating Testing Data LMDB File ..... ")
 
-in_db = lmdb.open(os.path.join(lmdb_dir,'test-lmdb'), map_size=int(1e12))
+in_db = lmdb.open(os.path.join(lmdb_dir,'test-lmdb'), map_size=int(1e14))
 createLMDB(in_db, inputs_Test, resize)
 
 
