@@ -20,7 +20,7 @@ if True:
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(200, 4001, 200)
+	iter = range(200, 201, 200)
 
 
 
@@ -63,7 +63,7 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		L = label_dict[in_idx]
 		
 		acc[in_idx] = np.mean(out==L)
-		print(str(in_idx), ': acc=', np.mean(out==L))
+		print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=np.mean(out==L)))
 	return(np.mean(acc))
 
 
@@ -79,6 +79,7 @@ train_acc = np.zeros(len(iter))
 test_acc = np.zeros(len(iter))
 for idx,snapshot_id in enumerate(iter): 
 	model_file = snapshot.format(snapshot_id=snapshot_id)
+	print(model_file)
 	pred_visual_dir = pred_visual_dir_template.format(snapshot_id=snapshot_id)
 	if not os.path.exists(pred_visual_dir):
 		os.makedirs(pred_visual_dir)
