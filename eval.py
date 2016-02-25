@@ -53,7 +53,7 @@ def plot_acc(x, y, v):
 	plt.savefig(os.path.join(work_dir, '{version}_accuracy.png'.format(version=v)))
 
 # Main procedure which takes image/label sets and evaluate on a range of caffe models
-def eval(inputs, inputs_Label, dataset)	
+def eval(inputs, inputs_Label, dataset):
 	acc = np.zeros(len(iter))
 	for idx,snapshot_id in enumerate(iter): 
 		model_file = snapshot.format(snapshot_id=snapshot_id)
@@ -64,9 +64,9 @@ def eval(inputs, inputs_Label, dataset)
 		
 		acc[idx] = test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)
 		plot_acc(iter[:(idx+1)], acc[:(idx+1)], [model, dataset])
-	
-	
-	
+
+
+
 if False:
 	lmdb_dir = 'mass_lmdb'
 
