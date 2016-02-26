@@ -71,7 +71,7 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'camvid_train_lr1e-12'
+	model = 'camvid_lr1e-12'
 	lmdb_dir = 'camvid_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
