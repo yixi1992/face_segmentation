@@ -63,21 +63,21 @@ def eval(inputs, inputs_Label, dataset):
 			os.makedirs(pred_visual_dir)
 		
 		acc[idx] = test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)
-		plot_acc(iter[:(idx+1)], acc[:(idx+1)], [model, dataset])
+		plot_acc(iter[:(idx+1)], acc[:(idx+1)], dataset + '_' + model)
 
 
-
+#MODIFY ME
 if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'camvid_/train_lr1e-12'
+	model = 'camvid_train_lr1e-12'
 	lmdb_dir = 'camvid_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(200, 201, 200)
+	iter = range(200, 1001, 200)
 
 
 inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
