@@ -77,7 +77,7 @@ if True:
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(200, 1001, 200)
+	iter = range(200, 4001, 200)
 
 
 inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
