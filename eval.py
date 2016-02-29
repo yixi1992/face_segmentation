@@ -80,11 +80,11 @@ if True:
 	iter = range(200, 4001, 200)
 
 
-inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-eval(inputs_Train, inputs_Train_Label, 'Train')
-inputs_Train.clear()
-inputs_Train_Label.clear()
+#inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+#inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+#eval(inputs_Train, inputs_Train_Label, 'Train')
+#inputs_Train.clear()
+#inputs_Train_Label.clear()
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
