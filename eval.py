@@ -89,7 +89,6 @@ def eval(inputs, inputs_Label, dataset):
 		
 		acc[idx] = test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)
 		plot_acc(iter[:(idx+1)], acc[:(idx+1)], dataset + '_' + model)
-		break
 
 #MODIFY ME
 if False:
