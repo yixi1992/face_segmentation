@@ -32,23 +32,22 @@ def mIU(pr, gt):
 	s = np.zeros(R+1) #sum_j n_ji
 	n = np.zeros(R+1)
 	acc = []
-	print(L, ' ', R)
 	for i in range(L,R+1,1):
 		t[i] = np.sum(pr==i)
 		s[i] = np.sum(gt==i)
 		n[i] = np.sum((pr==i) & (gt==i))
 		if not (t[i]+s[i]-n[i]==0):
 			acc = acc + n[i]/(t[i]+s[i]-n[i])
-		print(t[i]+s[i]-i)
 	return np.mean(acc)
 
 # Predict segmentation mask and return accuracy of a model_file on provided image/label set
 def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
+	print '-----------', 'model_file: ', model_file, '-----------'
 	acc = []
 	# load net
-	net = caffe.Net(deploy_file, model_file, caffe.TEST)
 	for in_idx, in_ in image_dict.iteritems():	
-		if False:
+		if not shortcut_inference:
+			net = caffe.Net(deploy_file, model_file, caffe.TEST)
 			# shape for input (data blob is N x C x H x W), set data
 			net.blobs['data'].reshape(1, *in_.shape)
 			net.blobs['data'].data[...] = in_
@@ -59,7 +58,7 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 			
 			scipy.misc.imsave(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)), out)
 		else:
-			scipy.misc.imread(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)), out)
+			out = scipy.misc.imread(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)))
 		
 		L = label_dict[in_idx]
 		
@@ -90,7 +89,7 @@ def eval(inputs, inputs_Label, dataset):
 		
 		acc[idx] = test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)
 		plot_acc(iter[:(idx+1)], acc[:(idx+1)], dataset + '_' + model)
-
+		break
 
 #MODIFY ME
 if False:
@@ -105,6 +104,15 @@ if True:
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
 	iter = range(200, 4001, 200)
 
+shortcut_inference = True
+
+inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+eval(inputs_Train, inputs_Train_Label, 'Train')
+inputs_Train.clear()
+inputs_Train_Label.clear()
+
+
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
@@ -113,8 +121,3 @@ inputs_Test.clear()
 inputs_Test_Label.clear()
 
 
-inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-eval(inputs_Train, inputs_Train_Label, 'Train')
-inputs_Train.clear()
-inputs_Train_Label.clear()
