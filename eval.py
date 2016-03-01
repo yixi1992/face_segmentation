@@ -25,26 +25,20 @@ def LMDB2Dict(lmdb_directory):
 # Mean Intersection over Union
 # http://www.cs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf
 # (1/ncl) \sum_i n_ii / (\sum_j n_ij + \sum_j n_ji - nii)
-def mIU(pr, gt):
-	R = max(np.amax(pr), np.amax(gt))
-	L = min(np.amin(pr), np.amin(gt))
-	acc = []
-	for i in range(L,R+1,1):
-		t = np.sum(pr==i)
-		s = np.sum(gt==i)
-		n = np.sum((pr==i) & (gt==i))
-		if ((t+s-n)!=0):
-			acc = acc+ [float(n)/float(t+s-n)]
-		print '*********************', i, ': ', n, '/', t+s-n, '--------', acc, '*********************'
-	return np.mean(acc)
+def confcount(confcounts, pr, gt):
+	for i in range(0, numclasses):
+		for j in range(0, numclasses):
+			confcounts[i][j] = confcounts[i][j] + np.sum((gt==i) & (pr==j)) 
+	return confcounts
 
 # Predict segmentation mask and return accuracy of a model_file on provided image/label set
 def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	print '-----------', 'model_file: ', model_file, '-----------'
 	acc = []
-	# load net
+	confcounts = np.zeros((numclasses, numclasses))
 	for in_idx, in_ in image_dict.iteritems():	
 		if not shortcut_inference:
+			# load net
 			net = caffe.Net(deploy_file, model_file, caffe.TEST)
 			# shape for input (data blob is N x C x H x W), set data
 			net.blobs['data'].reshape(1, *in_.shape)
@@ -60,14 +54,28 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		
 		L = label_dict[in_idx]
 		
-		#mIU intersection over union
-		miu2 = mIU(out, L)
-		acc = acc + miu2
-		#pixel accuracy
-		#acc = acc + [np.mean(out==L)]
-		print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=miu2))
-	print '-----------', 'model_file: ', model_file, '  acc:', np.mean(acc), '-----------'
-	return(np.mean(acc))
+		if eval_metric=='pixel_accuracy':
+			# pixel accuracy
+			acc = acc + [np.mean(out==L)]
+			print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=np.mean(out==L)))
+		elif eval_metric=='eval_miu':
+			# mIU intersection over union
+			confcounts = confcount(confcounts, out, L)
+	
+	if eval_metric=='pixel_accuracy':
+		print '-----------', 'model_file: ', model_file, '  acc:', np.mean(acc), '-----------'
+		return(np.mean(acc))	
+	elif eval_metric=='eval_miu':
+		# mIU intersection over union
+		miu = 0
+		colsum = np.sum(confcounts, 0)
+		rowsum = np.sum(confcounts, 1)
+		for i in range(0, numclasses):
+			miu = miu + float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
+			print i, ' miu=', miu/numclasses, '    ', float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i]),'=', confcounts[i][i], ' in ', rowsum[i], ',', colsum[i], '-----------'
+		print '-----------', 'model_file: ', model_file, '  miu:', miu/numclasses, '-----------'
+		return miu/numclasses
+
 
 # Plot the accuracy curve and save to file
 def plot_acc(x, y, v):
@@ -92,6 +100,7 @@ def eval(inputs, inputs_Label, dataset):
 
 #MODIFY ME
 if False:
+	# NOT tested
 	lmdb_dir = 'mass_lmdb'
 
 if True:
@@ -102,6 +111,8 @@ if True:
 	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
 	iter = range(200, 4001, 200)
+	numclasses = 32
+	eval_metric = 'eval_miu'
 
 shortcut_inference = True
 
