@@ -28,16 +28,14 @@ def LMDB2Dict(lmdb_directory):
 def mIU(pr, gt):
 	R = max(np.amax(pr), np.amax(gt))
 	L = min(np.amin(pr), np.amin(gt))
-	t = np.zeros(R+1) #sum_j n_ij
-	s = np.zeros(R+1) #sum_j n_ji
-	n = np.zeros(R+1)
 	acc = []
 	for i in range(L,R+1,1):
-		t[i] = np.sum(pr==i)
-		s[i] = np.sum(gt==i)
-		n[i] = np.sum((pr==i) & (gt==i))
-		if not (t[i]+s[i]-n[i]==0):
-			acc = acc + n[i]/(t[i]+s[i]-n[i])
+		t = np.sum(pr==i)
+		s = np.sum(gt==i)
+		n = np.sum((pr==i) & (gt==i))
+		if ((t+s-n)!=0):
+			acc = acc+ [float(n)/float(t+s-n)]
+		print '*********************', i, ': ', n, '/', t+s-n, '--------', acc, '*********************'
 	return np.mean(acc)
 
 # Predict segmentation mask and return accuracy of a model_file on provided image/label set
@@ -63,10 +61,12 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		L = label_dict[in_idx]
 		
 		#mIU intersection over union
-		acc = acc + mIU(out, L)
+		miu2 = mIU(out, L)
+		acc = acc + miu2
 		#pixel accuracy
 		#acc = acc + [np.mean(out==L)]
-		print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=np.mean(out==L)))
+		print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=miu2))
+	print '-----------', 'model_file: ', model_file, '  acc:', np.mean(acc), '-----------'
 	return(np.mean(acc))
 
 # Plot the accuracy curve and save to file
@@ -75,11 +75,11 @@ def plot_acc(x, y, v):
 	plt.plot(x,y)
 	plt.ylabel('mIU')
 	plt.title('{version} mIU'.format(version=v))
-	plt.savefig(os.path.join(work_dir, '{version}_accuracy.png'.format(version=v)))
+	plt.savefig(os.path.join(work_dir, '{version}_mIU.png'.format(version=v)))
 
 # Main procedure which takes image/label sets and evaluate on a range of caffe models
 def eval(inputs, inputs_Label, dataset):
-	acc = np.zeros(len(iter))
+	acc = []
 	for idx,snapshot_id in enumerate(iter): 
 		model_file = snapshot.format(snapshot_id=snapshot_id)
 		print(model_file)
@@ -87,8 +87,8 @@ def eval(inputs, inputs_Label, dataset):
 		if not os.path.exists(pred_visual_dir):
 			os.makedirs(pred_visual_dir)
 		
-		acc[idx] = test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)
-		plot_acc(iter[:(idx+1)], acc[:(idx+1)], dataset + '_' + model)
+		acc = acc + [test_accuracy(model_file, inputs, inputs_Label, pred_visual_dir, dataset)]
+		plot_acc(iter[:(idx+1)], acc, dataset + '_' + model)
 
 #MODIFY ME
 if False:
