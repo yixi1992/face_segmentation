@@ -22,6 +22,24 @@ def LMDB2Dict(lmdb_directory):
 		D[key] = data
 	return D
 
+# Mean Intersection over Union
+# http://www.cs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf
+# (1/ncl) \sum_i n_ii / (\sum_j n_ij + \sum_j n_ji - nii)
+def mIU(pr, gt):
+	R = max(np.amax(pr), np.amax(gt))
+	L = min(np.amin(pr), np.amin(gt))
+	t = np.zeros(R+1) #sum_j n_ij
+	s = np.zeros(R+1) #sum_j n_ji
+	n = np.zeros(R+1)
+	acc = []
+	for i in range(L,R+1,1):
+		t[i] = np.sum(pr==i)
+		s[i] = np.sum(gt==i)
+		n[i] = np.sum((pr==i) & (gt==i))
+		if not (t[i]+s[i]-n[i]==0):
+			acc = acc + n[i]/(t[i]+s[i]-n[i])
+	return np.mean(acc)
+
 # Predict segmentation mask and return accuracy of a model_file on provided image/label set
 def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	acc = []
@@ -40,7 +58,10 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		
 		L = label_dict[in_idx]
 		
-		acc = acc + [np.mean(out==L)]
+		#mIU intersection over union
+		acc = acc + mIU(out, L)
+		#pixel accuracy
+		#acc = acc + [np.mean(out==L)]
 		print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=np.mean(out==L)))
 	return(np.mean(acc))
 
@@ -48,8 +69,8 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 def plot_acc(x, y, v):
 	plt.clf()
 	plt.plot(x,y)
-	plt.ylabel('accuracy')
-	plt.title('{version} accuracy'.format(version=v))
+	plt.ylabel('mIU')
+	plt.title('{version} mIU'.format(version=v))
 	plt.savefig(os.path.join(work_dir, '{version}_accuracy.png'.format(version=v)))
 
 # Main procedure which takes image/label sets and evaluate on a range of caffe models
@@ -80,15 +101,15 @@ if True:
 	iter = range(200, 4001, 200)
 
 
-#inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-#inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-#eval(inputs_Train, inputs_Train_Label, 'Train')
-#inputs_Train.clear()
-#inputs_Train_Label.clear()
-
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
 eval(inputs_Test, inputs_Test_Label, 'Test')
 inputs_Test.clear()
 inputs_Test_Label.clear()
 
+
+inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+eval(inputs_Train, inputs_Train_Label, 'Train')
+inputs_Train.clear()
+inputs_Train_Label.clear()
