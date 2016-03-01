@@ -32,12 +32,14 @@ def mIU(pr, gt):
 	s = np.zeros(R+1) #sum_j n_ji
 	n = np.zeros(R+1)
 	acc = []
+	print(L, ' ', R)
 	for i in range(L,R+1,1):
 		t[i] = np.sum(pr==i)
 		s[i] = np.sum(gt==i)
 		n[i] = np.sum((pr==i) & (gt==i))
 		if not (t[i]+s[i]-n[i]==0):
 			acc = acc + n[i]/(t[i]+s[i]-n[i])
+		print(t[i]+s[i]-i)
 	return np.mean(acc)
 
 # Predict segmentation mask and return accuracy of a model_file on provided image/label set
@@ -46,15 +48,18 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	# load net
 	net = caffe.Net(deploy_file, model_file, caffe.TEST)
 	for in_idx, in_ in image_dict.iteritems():	
-		# shape for input (data blob is N x C x H x W), set data
-		net.blobs['data'].reshape(1, *in_.shape)
-		net.blobs['data'].data[...] = in_
-		# run net and take argmax for prediction
-		net.forward()
-		out = net.blobs['score'].data[0].argmax(axis=0)
-		out = np.array(out, dtype=np.uint8)
-		
-		scipy.misc.imsave(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)), out)
+		if False:
+			# shape for input (data blob is N x C x H x W), set data
+			net.blobs['data'].reshape(1, *in_.shape)
+			net.blobs['data'].data[...] = in_
+			# run net and take argmax for prediction
+			net.forward()
+			out = net.blobs['score'].data[0].argmax(axis=0)
+			out = np.array(out, dtype=np.uint8)
+			
+			scipy.misc.imsave(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)), out)
+		else:
+			scipy.misc.imread(os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx)), out)
 		
 		L = label_dict[in_idx]
 		
