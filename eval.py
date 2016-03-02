@@ -38,6 +38,10 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	confcounts = np.zeros((numclasses, numclasses))
 	for in_idx, in_ in image_dict.iteritems():	
 		if not shortcut_inference:
+			# subtract mean from RGB
+			im = caffe.io.datum_to_array(in_)
+			im -= np.array(input_RGB_mean[v])
+			in_ = caffe.io.array_to_datum(im)
 			# load net
 			net = caffe.Net(deploy_file, model_file, caffe.TEST)
 			# shape for input (data blob is N x C x H x W), set data
@@ -108,17 +112,18 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'camvid_lr1e-12'
-	lmdb_dir = 'camvid_lmdb'
+	model = 'camvid300_lr1e-12'
+	lmdb_dir = 'camvid300_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv/model2'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
-	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
+	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
+	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12/_iter_{snapshot_id}')
 	iter = range(4000, 15840, 200)
 	numclasses = 32
 	eval_metric = 'eval_miu'
-
-shortcut_inference = False
+	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
+			'Test':(109.82771956, 108.03965333, 105.06809756)}
+	shortcut_inference = False
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
