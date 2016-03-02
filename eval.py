@@ -38,8 +38,10 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	confcounts = np.zeros((numclasses, numclasses))
 	for in_idx, in_ in image_dict.iteritems():	
 		if not shortcut_inference:
+			print in_.dtype
+			in_ = np.array(in_, np.float)
 			# subtract mean from RGB
-			in_ -= np.array(input_RGB_mean[v])
+			in_ -= np.array(input_RGB_mean[v], dtype=np.float)
 			
 			# load net
 			net = caffe.Net(deploy_file, model_file, caffe.TEST)
