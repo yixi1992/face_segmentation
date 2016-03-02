@@ -1,5 +1,5 @@
 net: "train_val.prototxt"
-test_iter: 20
+test_iter: 651
 # make test net, but don't invoke it from the solver itself
 test_interval: 1000000
 display: 20
