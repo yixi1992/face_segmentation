@@ -6,7 +6,7 @@ display: 20
 average_loss: 20
 lr_policy: "fixed"
 # lr for unnormalized softmax -- see train_val definition
-base_lr: 1e-12
+base_lr: 1e-10
 # high momentum
 momentum: 0.99
 # no gradient accumulation
@@ -14,5 +14,5 @@ iter_size: 1
 max_iter: 80000
 weight_decay: 0.0005
 snapshot: 300
-snapshot_prefix: "snapshots_camvid300/train_lr1e-12/"
+snapshot_prefix: "snapshots_camvid300/train_lr1e-12_12300_lr1e-10/"
 test_initialization: false
