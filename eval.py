@@ -71,8 +71,12 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		colsum = np.sum(confcounts, 0)
 		rowsum = np.sum(confcounts, 1)
 		for i in range(0, numclasses):
-			miu = miu + float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
-			print i, ' miu=', miu/numclasses, '    ', float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i]),'=', confcounts[i][i], ' in ', rowsum[i], ',', colsum[i], '-----------'
+			if (rowsum[i]+colsum[i]-confcounts[i][i]>1e-6):
+				miu2 = float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
+			else:
+				miu2 = 0
+			miu = miu + miu2
+			print i, ' miu=', miu/numclasses, '    ', miu2, '=', confcounts[i][i], '/', rowsum[i], ',', colsum[i], '-----------'
 		print '-----------', 'model_file: ', model_file, '  miu:', miu/numclasses, '-----------'
 		return miu/numclasses
 
@@ -106,28 +110,27 @@ if False:
 if True:
 	model = 'camvid_lr1e-12'
 	lmdb_dir = 'camvid_lmdb'
-	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv'
+	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv/model2'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(200, 4001, 200)
+	iter = range(4000, 15840, 200)
 	numclasses = 32
 	eval_metric = 'eval_miu'
 
-shortcut_inference = True
-
-inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-eval(inputs_Train, inputs_Train_Label, 'Train')
-inputs_Train.clear()
-inputs_Train_Label.clear()
-
-
+shortcut_inference = False
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
 eval(inputs_Test, inputs_Test_Label, 'Test')
 inputs_Test.clear()
 inputs_Test_Label.clear()
+
+
+inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+eval(inputs_Train, inputs_Train_Label, 'Train')
+inputs_Train.clear()
+inputs_Train_Label.clear()
 
 
