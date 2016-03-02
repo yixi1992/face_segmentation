@@ -16,10 +16,10 @@ import shutil
 resize = True
 # NumberTrain = 20 # Number of Training Images
 NumberTest = 50 # Number of Testing Images
-Rheight = 224 # Required Height
-Rwidth = 224 # Required Width
-LabelWidth = 224 # Downscaled width of the label
-LabelHeight = 224 # Downscaled height of the label
+Rheight = 300 # Required Height
+Rwidth = 300 # Required Width
+LabelWidth = 300 # Downscaled width of the label
+LabelHeight = 300 # Downscaled height of the label
 
 
 if False:
@@ -36,7 +36,7 @@ if False:
 
 
 if True:
-	lmdb_dir = 'camvid_lmdb'
+	lmdb_dir = 'camvid_lmdb300'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	
@@ -50,6 +50,7 @@ if True:
 
 
 def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
+	RGB_sum = np.zeros(3)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, in_) in inputs_Train:
 			im = np.array(Image.open(in_))
@@ -63,14 +64,16 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 					im = im.resize([Rheight, Rwidth], Image.ANTIALIAS)
 				else:
 					im = im.resize([LabelHeight, LabelWidth],Image.NEAREST)
-					print(np.amax(im))
 			im = np.array(im,Dtype)     
 			if isLabel:
 				im = im.reshape(im.shape[0],im.shape[1],1)
+			else:
+				RGB_sum = RGB_sum + np.mean(im, axis=2)
 			im = im.transpose((2,0,1))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(in_idx,im_dat.SerializeToString())
 	in_db.close()
+	print 'mean RGB=',RGB_sum/len(inputs_Train)
 	
 	
 	
