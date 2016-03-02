@@ -120,7 +120,7 @@ if True:
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(12000, 12301, 300)
+	iter = range(12000, 9000, -300)
 	numclasses = 32
 	eval_metric = 'eval_miu'
 	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
@@ -134,10 +134,10 @@ inputs_Test.clear()
 inputs_Test_Label.clear()
 
 
-inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-eval(inputs_Train, inputs_Train_Label, 'Train')
-inputs_Train.clear()
-inputs_Train_Label.clear()
+#inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+#inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+#eval(inputs_Train, inputs_Train_Label, 'Train')
+#inputs_Train.clear()
+#inputs_Train_Label.clear()
 
 
