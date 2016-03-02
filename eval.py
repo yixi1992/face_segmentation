@@ -38,11 +38,12 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	confcounts = np.zeros((numclasses, numclasses))
 	for in_idx, in_ in image_dict.iteritems():	
 		if not shortcut_inference:
-			print in_.dtype
-			in_ = np.array(in_, np.float)
+			in_ = in_.astype(np.float32)
 			# subtract mean from RGB
-			in_ -= np.array(input_RGB_mean[v], dtype=np.float)
-			
+			in_ = in_.transpose((1,2,0))
+			in_ -= np.array(input_RGB_mean[v], dtype=np.float32)
+			in_ = in_.transpose((2,0,1))
+
 			# load net
 			net = caffe.Net(deploy_file, model_file, caffe.TEST)
 			# shape for input (data blob is N x C x H x W), set data
@@ -119,7 +120,7 @@ if True:
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
 	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
 	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(4000, 15840, 200)
+	iter = range(12000, 12301, 300)
 	numclasses = 32
 	eval_metric = 'eval_miu'
 	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
