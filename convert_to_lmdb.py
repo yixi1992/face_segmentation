@@ -36,7 +36,7 @@ if False:
 
 
 if True:
-	lmdb_dir = 'camvid_lmdb300'
+	lmdb_dir = 'camvid300_lmdb'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	
@@ -69,6 +69,7 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 				im = im.reshape(im.shape[0],im.shape[1],1)
 			else:
 				RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
+				
 			im = im.transpose((2,0,1))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(in_idx,im_dat.SerializeToString())
