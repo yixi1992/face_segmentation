@@ -68,7 +68,7 @@ def createLMDB(in_db, inputs_Train, resize=False, isLabel=False):
 			if isLabel:
 				im = im.reshape(im.shape[0],im.shape[1],1)
 			else:
-				RGB_sum = RGB_sum + np.mean(im, axis=2)
+				RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
 			im = im.transpose((2,0,1))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(in_idx,im_dat.SerializeToString())
