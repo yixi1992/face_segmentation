@@ -39,9 +39,8 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	for in_idx, in_ in image_dict.iteritems():	
 		if not shortcut_inference:
 			# subtract mean from RGB
-			im = caffe.io.datum_to_array(in_)
-			im -= np.array(input_RGB_mean[v])
-			in_ = caffe.io.array_to_datum(im)
+			in_ -= np.array(input_RGB_mean[v])
+			
 			# load net
 			net = caffe.Net(deploy_file, model_file, caffe.TEST)
 			# shape for input (data blob is N x C x H x W), set data
