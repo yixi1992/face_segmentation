@@ -114,18 +114,19 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'camvid300_lr1e-12'
+	model = 'camvid300_lr1e-12_12300_lr1e-10_12500'
 	lmdb_dir = 'camvid300_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv/model2'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12/_iter_{snapshot_id}.caffemodel')
-	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12/_iter_{snapshot_id}')
-	iter = range(12000, 9000, -300)
+	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12_12300_lr1e-10_12500/_iter_{snapshot_id}.caffemodel')
+	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12_12300_lr1e-10_12500/_iter_{snapshot_id}')
+	iter = range(13000, 9000, -1000)
 	numclasses = 32
 	eval_metric = 'eval_miu'
 	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
 			'Test':(109.82771956, 108.03965333, 105.06809756)}
 	shortcut_inference = False
+
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
 inputs_Test_Label = LMDB2Dict(os.path.join(lmdb_dir,'test-label-lmdb'))
@@ -134,10 +135,10 @@ inputs_Test.clear()
 inputs_Test_Label.clear()
 
 
-#inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
-#inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-#eval(inputs_Train, inputs_Train_Label, 'Train')
-#inputs_Train.clear()
-#inputs_Train_Label.clear()
+inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
+eval(inputs_Train, inputs_Train_Label, 'Train')
+inputs_Train.clear()
+inputs_Train_Label.clear()
 
 
