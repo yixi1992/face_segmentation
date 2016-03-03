@@ -13,6 +13,6 @@ momentum: 0.99
 iter_size: 1
 max_iter: 80000
 weight_decay: 0.0005
-snapshot: 300
-snapshot_prefix: "snapshots_camvid300/train_lr1e-12_12300_lr1e-10/"
+snapshot: 1000
+snapshot_prefix: "snapshots_camvid300/train_lr1e-12_12300_lr1e-10_12500/"
 test_initialization: false
