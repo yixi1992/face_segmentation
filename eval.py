@@ -74,17 +74,19 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	elif eval_metric=='eval_miu':
 		# mIU intersection over union
 		miu = 0
+		miu_cnt = 0
 		colsum = np.sum(confcounts, 0)
 		rowsum = np.sum(confcounts, 1)
 		for i in range(0, numclasses):
 			if (rowsum[i]+colsum[i]-confcounts[i][i]>1e-6):
 				miu2 = float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
+				miu_cnt += 1
 			else:
 				miu2 = 0
 			miu = miu + miu2
-			print i, ' miu=', miu/numclasses, '    ', miu2, '=', confcounts[i][i], '/', rowsum[i], ',', colsum[i], '-----------'
-		print '-----------', 'model_file: ', model_file, '  miu:', miu/numclasses, '-----------'
-		return miu/numclasses
+			print i, ' miu=', miu/miu_cnt, '    ', miu2, '=', confcounts[i][i], '/', rowsum[i], ',', colsum[i], '-----------'
+		print '-----------', 'model_file: ', model_file, '  miu:', miu/miu_cnt, '-----------'
+		return miu/miu_cnt
 
 
 # Plot the accuracy curve and save to file
@@ -125,7 +127,7 @@ if True:
 	eval_metric = 'eval_miu'
 	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
 			'Test':(109.82771956, 108.03965333, 105.06809756)}
-	shortcut_inference = False
+	shortcut_inference = True
 
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
