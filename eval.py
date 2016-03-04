@@ -83,6 +83,7 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 				miu_cnt += 1
 			else:
 				miu2 = 0
+				continue
 			miu = miu + miu2
 			print i, ' miu=', miu/miu_cnt, '    ', miu2, '=', confcounts[i][i], '/', rowsum[i], ',', colsum[i], '-----------'
 		print '-----------', 'model_file: ', model_file, '  miu:', miu/miu_cnt, '-----------'
