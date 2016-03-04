@@ -34,7 +34,7 @@ def interp_surgery(net, layers):
 # base_weights = 'vgg16fc.caffemodel'
 # base_weights = '../VGG16fc.caffemodel'
 # base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/model2/snapshots_camvid300/train_lr1e-12/_iter_12300.caffemodel'
-base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/model2/snapshots_camvid300/train_lr1e-12_12300_lr1e-10/_iter_12500.caffemodel'
+base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/model2/snapshots_camvid300/train_lr1e-12_12300_lr1e-10_12500/_iter_13000.caffemodel'
 
 # init
 caffe.set_mode_gpu()
