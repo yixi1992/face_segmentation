@@ -78,6 +78,8 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 		colsum = np.sum(confcounts, 0)
 		rowsum = np.sum(confcounts, 1)
 		for i in range(0, numclasses):
+			if not (i in interested_class):
+				continue
 			if (rowsum[i]+colsum[i]-confcounts[i][i]>1e-6):
 				miu2 = float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
 				miu_cnt += 1
@@ -94,9 +96,9 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 def plot_acc(x, y, v):
 	plt.clf()
 	plt.plot(x,y)
-	plt.ylabel('mIU')
-	plt.title('{version} mIU'.format(version=v))
-	plt.savefig(os.path.join(work_dir, '{version}_mIU.png'.format(version=v)))
+	plt.ylabel(eval_metric)
+	plt.title('{version} {metric}'.format(version=v, metric=eval_metric))
+	plt.savefig(os.path.join(work_dir, '{version}_{metric}.png'.format(version=v, metric=eval_metric)))
 
 # Main procedure which takes image/label sets and evaluate on a range of caffe models
 def eval(inputs, inputs_Label, dataset):
@@ -117,18 +119,20 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'camvid300_lr1e-12_12300_lr1e-10_12500'
+	model = 'camvid300_fcn8_lr1e-10w0.0005'
 	lmdb_dir = 'camvid300_lmdb'
-	work_dir = '/lustre/yixi/face_segmentation_finetune/fullconv/model2'
+	work_dir = '/lustre/yixi/face_segmentation_finetune/fcn8/model1'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-12_12300_lr1e-10_12500/_iter_{snapshot_id}.caffemodel')
-	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-12_12300_lr1e-10_12500/_iter_{snapshot_id}')
-	iter = range(13000, 9000, -1000)
+	snapshot = os.path.join(work_dir, 'snapshots_camvid300/train_lr1e-10w0.0005_12000/_iter_{snapshot_id}.caffemodel')
+	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid300/train_lr1e-10w0.0005_12000/_iter_{snapshot_id}')
+	iter = range(26000, 18000, -1000)
 	numclasses = 32
+	#interested_class = range(0, numclasses)
+	interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
 	eval_metric = 'eval_miu'
 	input_RGB_mean = {'Train':(104.05459223, 101.95628549, 98.56123181),
 			'Test':(109.82771956, 108.03965333, 105.06809756)}
-	shortcut_inference = True
+	shortcut_inference = False
 
 
 inputs_Test = LMDB2Dict(os.path.join(lmdb_dir,'test-lmdb'))
