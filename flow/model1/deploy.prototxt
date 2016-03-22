@@ -468,7 +468,7 @@ layer {
   }
 }
 layer {
-  name: "score59"
+  name: "score59flow"
   type: "Convolution"
   bottom: "fc7"
   top: "score59"
@@ -493,7 +493,7 @@ layer {
   }
 }
 layer {
-  name: "upscore2"
+  name: "upscore2flow"
   type: "Deconvolution"
   bottom: "score59"
   top: "upscore2"
@@ -509,7 +509,7 @@ layer {
   }
 }
 layer {
-  name: "score-pool4"
+  name: "score-pool4flow"
   type: "Convolution"
   bottom: "pool4"
   top: "score-pool4"
@@ -540,7 +540,7 @@ layer {
   }
 }
 layer {
-  name: "upsample-fused-16"
+  name: "upsample-fused-16flow"
   type: "Deconvolution"
   bottom: "score-fused"
   top: "score4"
@@ -556,7 +556,7 @@ layer {
   }
 }
 layer {
-  name: "score-pool3"
+  name: "score-pool3flow"
   type: "Convolution"
   bottom: "pool3"
   top: "score-pool3"
@@ -587,7 +587,7 @@ layer {
   }
 }
 layer {
-  name: "upsample"
+  name: "upsampleflow"
   type: "Deconvolution"
   bottom: "score-final"
   top: "bigscore"
