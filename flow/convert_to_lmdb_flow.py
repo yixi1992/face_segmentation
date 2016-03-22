@@ -17,9 +17,9 @@ import random
 resize = True
 # NumberTrain = 20 # Number of Training Images
 NumberTest = 50 # Number of Testing Images
-RSize = (200, 200)
-LabelSize = (200, 200)
-
+RSize = (300, 300)
+LabelSize = (300, 300)
+NumLabels = 32
 
 if False:
 	lmdb_dir = 'mass_lmdb'
@@ -35,7 +35,7 @@ if False:
 
 
 if True:
-	lmdb_dir = 'camvid200flow_lmdb'
+	lmdb_dir = 'camvid300flow_lmdb'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
@@ -65,9 +65,9 @@ class Resizer:
 	def padarray(self, im):
 		pad_size = (self.box_size[0]-im.shape[0], self.box_size[1]-im.shape[1])
 		if im.ndim==2:
-			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = 0)
+			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = NumLabels)
 		else:
-			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1]), (0,0)), mode='constant', constant_values = 0)
+			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1]), (0,0)), mode='constant', constant_values = NumLabels)
 		return pad_im
 
 class ImageResizer(Resizer):
@@ -76,6 +76,14 @@ class ImageResizer(Resizer):
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
 		return np.array(res_im)
+
+class LabelResizer(Resizer):
+	def resize(self, im):
+		pad_im = self.padarray(im)
+		pad_im = Image.fromarray(pad_im)
+		res_im = pad_im.resize(self.size, Image.NEAREST)
+		return np.array(res_im)
+
 
 
 
@@ -87,13 +95,14 @@ def createLMDB(in_db, inputs_Train, flow_x={}, flow_y={}, resize=False, isLabel=
 #			print in_idx, in_
 			if isLabel:
 				Dtype = im.dtype
-				im = im.reshape(im.shape[0],im.shape[1],1)
 				
 				if resize:
-					res = ImageResizer(LabelSize, BoxSize)
+					res = LabelResizer(LabelSize, BoxSize)
 					im = res.resize(im)
 				
-				im = np.array(im, Dtype)					
+				im = im.reshape(im.shape[0],im.shape[1],1)
+				im = np.array(im, Dtype)
+				print np.amin(im),np.amax(im), im.shape
 			else:
 				Dtype = im.dtype
 				im = im[:,:,::-1]	# reverse channels of image data
@@ -119,7 +128,7 @@ def createLMDB(in_db, inputs_Train, flow_x={}, flow_y={}, resize=False, isLabel=
 					im = im_res
 				
 				im = np.array(im,Dtype)
-				print im.shape
+				#print im.shape
 				RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
 			
 			im = im.transpose((2,0,1))
@@ -148,7 +157,7 @@ createLMDB(in_db, inputs_Train, flow_x=flow_x_Train, flow_y=flow_y_Train, resize
 print("Creating Training Label LMDB File ..... ")
  
 in_db = lmdb.open(os.path.join(lmdb_dir,'train-label-lmdb'), map_size=int(1e12))
-createLMDB(in_db, inputs_Train_Label, resize, isLabel=True)
+createLMDB(in_db, inputs_Train_Label, resize=resize, isLabel=True)
 
 
 ############################# Creating LMDB for Testing Data ##############################
@@ -164,4 +173,4 @@ createLMDB(in_db, inputs_Test, flow_x=flow_x_Test, flow_y=flow_y_Test, resize=re
 print("Creating Testing Label LMDB File ..... ")
 
 in_db = lmdb.open(os.path.join(lmdb_dir,'test-label-lmdb'), map_size=int(1e12))
-createLMDB(in_db, inputs_Test_Label, resize, isLabel=True)
+createLMDB(in_db, inputs_Test_Label, resize=resize, isLabel=True)
