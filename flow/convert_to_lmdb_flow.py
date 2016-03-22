@@ -17,8 +17,8 @@ import random
 resize = True
 # NumberTrain = 20 # Number of Training Images
 NumberTest = 50 # Number of Testing Images
-RSize = (300, 300)
-LabelSize = (300, 300)
+RSize = (200, 200)
+LabelSize = (200, 200)
 
 
 if False:
@@ -35,7 +35,7 @@ if False:
 
 
 if True:
-	lmdb_dir = 'camvid300flow_lmdb'
+	lmdb_dir = 'camvid200flow_lmdb'
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
@@ -116,6 +116,7 @@ def createLMDB(in_db, inputs_Train, flow_x={}, flow_y={}, resize=False, isLabel=
 						flow_im_res = res.resize(im[:,:,i])
 						flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
 						im_res = np.concatenate((im_res, flow_im_res), axis=2)
+					im = im_res
 				
 				im = np.array(im,Dtype)
 				print im.shape
