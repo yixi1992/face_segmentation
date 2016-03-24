@@ -14,5 +14,5 @@ iter_size: 1
 max_iter: 80000
 weight_decay: 0.0005 
 snapshot: 1000
-snapshot_prefix: "snapshots_camvid280210flownp/train_lr1e-10/"
+snapshot_prefix: "snapshots_camvid200flow/train_lr1e-10/"
 test_initialization: false
