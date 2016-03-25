@@ -1,72 +1,11 @@
 name: "FCN"
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  include {
-    phase: TRAIN
-  }
- #  Camvid300flow Mean
-  transform_param {
-  	mean_value: 78.19842634
-	mean_value: 76.61091037
-	mean_value: 74.05990695
-	mean_value: 93.24303944
-	mean_value: 97.82436321
-  }
-  data_param {
-    source: "../camvid200flow_lmdb/train-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "label"
-  type: "Data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  data_param {
-    source: "../camvid200flow_lmdb/train-label-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  include {
-    phase: TEST
-  }
- #  Camvid300 Mean
-  transform_param {
-  	mean_value: 78.19842634
-	mean_value: 76.61091037
-	mean_value: 74.05990695
-	mean_value: 93.24303944
-	mean_value: 97.82436321
-  }
-  data_param {
-    source: "../camvid200flow_lmdb/test-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "label"
-  type: "Data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-  data_param {
-    source: "../camvid200flow_lmdb/test-label-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
+
+input: "data"
+input_dim: 1
+input_dim: 5
+input_dim: 200
+input_dim: 200
+
 layer {
   name: "conv1_1_flow"
   type: "Convolution"
@@ -663,13 +602,3 @@ layer {
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'bigscore' bottom: 'data' top: 'score' }
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "score"
-  bottom: "label"
-  top: "loss"
-  loss_param {
-    normalize: false
-  }
-}
