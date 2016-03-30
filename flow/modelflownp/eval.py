@@ -121,13 +121,13 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'snapshots_camvid200flow_train_lr1e-10'
+	model = 'snapshots_camvid200flow_train_lr1e-10_19000_4000_1e-12'
 	lmdb_dir = '../camvid200flow_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-	snapshot = os.path.join(work_dir, 'snapshots_camvid200flow/train_lr1e-10/_iter_{snapshot_id}.caffemodel')
-	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200flow/train_lr1e-10/_iter_{snapshot_id}')
-	iter = range(19000, 17000, -1000)
+	snapshot = os.path.join(work_dir, 'snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_{snapshot_id}.caffemodel')
+	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_{snapshot_id}')
+	iter = range(58000, 57000, -1000)
 	numclasses = 33
 	#interested_class = range(0, numclasses)
 	interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
@@ -146,7 +146,7 @@ inputs_Test_Label.clear()
 
 inputs_Train = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
 inputs_Train_Label = LMDB2Dict(os.path.join(lmdb_dir,'train-label-lmdb'))
-eval(inputs_Train, inputs_Train_Label, 'Train')
+#eval(inputs_Train, inputs_Train_Label, 'Train')
 inputs_Train.clear()
 inputs_Train_Label.clear()
 

@@ -6,7 +6,7 @@ layer {
   include {
     phase: TRAIN
   }
- #  Camvid300flow Mean
+ #  Camvid300bg Mean
   transform_param {
   	mean_value: 78.19842634
 	mean_value: 76.61091037
@@ -85,6 +85,12 @@ layer {
     pad: 100
     kernel_size: 3
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer {
@@ -529,7 +535,7 @@ layer {
   }
 }
 layer {
-  name: "score59flow"
+  name: "score59bg"
   type: "Convolution"
   bottom: "fc7"
   top: "score59"
@@ -554,7 +560,7 @@ layer {
   }
 }
 layer {
-  name: "upscore2flow"
+  name: "upscore2bg"
   type: "Deconvolution"
   bottom: "score59"
   top: "upscore2"
@@ -570,7 +576,7 @@ layer {
   }
 }
 layer {
-  name: "score-pool4flow"
+  name: "score-pool4bg"
   type: "Convolution"
   bottom: "pool4"
   top: "score-pool4"
@@ -601,7 +607,7 @@ layer {
   }
 }
 layer {
-  name: "upsample-fused-16flow"
+  name: "upsample-fused-16bg"
   type: "Deconvolution"
   bottom: "score-fused"
   top: "score4"
@@ -617,7 +623,7 @@ layer {
   }
 }
 layer {
-  name: "score-pool3flow"
+  name: "score-pool3bg"
   type: "Convolution"
   bottom: "pool3"
   top: "score-pool3"
@@ -648,7 +654,7 @@ layer {
   }
 }
 layer {
-  name: "upsampleflow"
+  name: "upsamplebg"
   type: "Deconvolution"
   bottom: "score-final"
   top: "bigscore"

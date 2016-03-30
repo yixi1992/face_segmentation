@@ -38,7 +38,11 @@ def interp_surgery(net, layers):
 # base_weights = '/lustre/yixi/face_segmentation_finetune/fcn8/model1/snapshots_camvid300/train_lr1e-10w0.0005/_iter_12000.caffemodel'
 # base_weights = '/lustre/yixi/face_segmentation_finetune/fcn8/model1/snapshots_camvid300/train_lr1e-10w0.0005_12000/_iter_26000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/model1/snapshots_camvid300flow/train_lr1e-10/_iter_4850.caffemodel'
-base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10/_iter_19000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10/_iter_77000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_1e-12/_iter_77000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000/_iter_4000.caffemodel'
+base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_58000.caffemodel'
 
 # init
 caffe.set_mode_gpu()
