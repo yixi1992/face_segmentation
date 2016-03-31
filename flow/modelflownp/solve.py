@@ -42,7 +42,10 @@ def interp_surgery(net, layers):
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_1e-12/_iter_77000.caffemodel'
 
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000/_iter_4000.caffemodel'
-base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_58000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_58000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12_58000/_iter_58000.caffemodel'
+base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12_58000_58000/_iter_77000.caffemodel'
 
 # init
 caffe.set_mode_gpu()
@@ -51,8 +54,8 @@ caffe.set_device(0)
 solver = caffe.SGDSolver('solver.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
-interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-interp_surgery(solver.net, interp_layers)
+#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+#interp_surgery(solver.net, interp_layers)
 
 # copy base weights for fine-tuning
 solver.net.copy_from(base_weights)
