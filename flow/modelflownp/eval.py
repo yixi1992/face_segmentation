@@ -36,6 +36,8 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 	print '-----------', 'model_file: ', model_file, '-----------'
 	acc = []
 	confcounts = np.zeros((numclasses, numclasses))
+	# load net
+	net = caffe.Net(deploy_file, model_file, caffe.TEST)
 	for in_idx, in_ in image_dict.iteritems():	
 		file_path = os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=in_idx))
 		if ((not shortcut_inference) or (not os.path.exists(file_path))):
@@ -44,9 +46,7 @@ def test_accuracy(model_file, image_dict, label_dict, pred_visual_dir, v):
 			in_ = in_.transpose((1,2,0))
 			in_ -= np.array(input_RGB_mean[v], dtype=np.float32)
 			in_ = in_.transpose((2,0,1))
-
-			# load net
-			net = caffe.Net(deploy_file, model_file, caffe.TEST)
+			
 			# shape for input (data blob is N x C x H x W), set data
 			net.blobs['data'].reshape(1, *in_.shape)
 			net.blobs['data'].data[...] = in_
@@ -121,13 +121,13 @@ if False:
 	lmdb_dir = 'mass_lmdb'
 
 if True:
-	model = 'snapshots_camvid200flow_train_lr1e-10_19000_4000_1e-12'
+	model = 'snapshots_camvid200flow_modeldefault_lr1e-10_19000_38000'
 	lmdb_dir = '../camvid200flow_lmdb'
 	work_dir = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp'
 	deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-	snapshot = os.path.join(work_dir, 'snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_{snapshot_id}.caffemodel')
-	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_{snapshot_id}')
-	iter = range(58000, 57000, -1000)
+	snapshot = os.path.join(work_dir, 'snapshots_camvid200flow/modeldefault_lr1e-10_19000_38000/_iter_{snapshot_id}.caffemodel')
+	pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200flow/modeldefault_lr1e-10_19000_38000/_iter_{snapshot_id}')
+	iter = range(38000, 35000, -1000)
 	numclasses = 33
 	#interested_class = range(0, numclasses)
 	interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
