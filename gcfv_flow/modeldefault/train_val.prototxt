@@ -6,14 +6,13 @@ layer {
   include {
     phase: TRAIN
   }
- #  Camvid200 Mean
   transform_param {
   	mean_value: 78.1049806452
   	mean_value: 76.5400646313
   	mean_value: 74.0029471198
   }
   data_param {
-    source: "../camvid200200_lmdb/train-lmdb"
+    source: "../gcfv200200_lmdb/train-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -26,7 +25,7 @@ layer {
     phase: TRAIN
   }
   data_param {
-    source: "../camvid200200_lmdb/train-label-lmdb"
+    source: "../gcfv200200_lmdb/train-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -38,14 +37,13 @@ layer {
   include {
     phase: TEST
   }
- #  Camvid200 Mean
   transform_param {
    	mean_value: 78.1049806452
   	mean_value: 76.5400646313
   	mean_value: 74.0029471198
   }
   data_param {
-    source: "../camvid200200_lmdb/test-lmdb"
+    source: "../gcfv200200_lmdb/test-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -58,7 +56,7 @@ layer {
     phase: TEST
   }
   data_param {
-    source: "../camvid200200_lmdb/test-label-lmdb"
+    source: "../gcfv200200_lmdb/test-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -538,7 +536,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     kernel_size: 1
     engine: CAFFE
     weight_filler {
@@ -559,7 +557,7 @@ layer {
     decay_mult: 1
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -579,7 +577,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     kernel_size: 1
     engine: CAFFE
   }
@@ -606,7 +604,7 @@ layer {
     decay_mult: 1
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -626,7 +624,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     kernel_size: 1
     engine: CAFFE
   }
@@ -652,7 +650,7 @@ layer {
     lr_mult: 1
   }
   convolution_param {
-    num_output: 33
+    num_output: 9
     bias_term: false
     kernel_size: 16
     stride: 8
