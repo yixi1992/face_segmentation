@@ -1,66 +1,12 @@
 name: "FCN"
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-	mean_value: 83.3774396271
-  	mean_value: 87.3343435075
-  	mean_value: 86.27596998
-  }
-  data_param {
-    source: "../gcfv200200_lmdb/train-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "label"
-  type: "Data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  data_param {
-    source: "../gcfv200200_lmdb/train-label-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  include {
-    phase: TEST
-  }
-  transform_param {
-   	mean_value: 78.9876007601
-	mean_value: 84.7897544336
-	mean_value: 82.5061055614
-  }
-  data_param {
-    source: "../gcfv200200_lmdb/test-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
-layer {
-  name: "label"
-  type: "Data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-  data_param {
-    source: "../gcfv200200_lmdb/test-label-lmdb"
-    batch_size: 1
-    backend: LMDB
-  }
-}
+
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 200
+input_dim: 200
+
+
 layer {
   name: "conv1_1"
   type: "Convolution"
@@ -657,13 +603,4 @@ layer {
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'bigscore' bottom: 'data' top: 'score' }
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "score"
-  bottom: "label"
-  top: "loss"
-  loss_param {
-    normalize: false
-  }
-}
+
