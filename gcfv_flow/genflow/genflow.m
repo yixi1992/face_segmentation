@@ -10,10 +10,15 @@ FLOW_Y_SAVE_DIR = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/%
 files = dir(sprintf(FRAME_DIR, '*'));
 files = files(~[files.isdir]);
 
-for i=1:length(files)-1,
+
+for i=1:length(files),
 	[pathstr, name1, ext1] = fileparts(files(i).name);
-	[pathstr, name2, ext2] = fileparts(files(i+1).name);
-	if ~strcmp(name1, name2),
+	parts = strread(name1,'%s','delimiter','_');
+	vid = str2num(parts{1});
+	fid = str2num(parts{2});
+	name2 = [num2str(vid), '_', num2str(fid+1)];
+	
+	if exist(sprintf(FRAME_DIR, name2), 'file')~=2,
 		continue;
 	end
 
