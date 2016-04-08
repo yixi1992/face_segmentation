@@ -13,7 +13,7 @@ files = files(~[files.isdir]);
 for i=1:length(files)-1,
 	[pathstr, name1, ext1] = fileparts(files(i).name);
 	[pathstr, name2, ext2] = fileparts(files(i+1).name);
-	if name1~=name2,
+	if ~strcmp(name1, name2),
 		continue;
 	end
 
