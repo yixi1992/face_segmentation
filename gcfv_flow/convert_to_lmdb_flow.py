@@ -51,13 +51,12 @@ class LabelResizer(Resizer):
 		res_im = pad_im.resize(self.size, Image.NEAREST)
 		return np.array(res_im)
 
-def LoadLabel(filename, resize=False):
+def LoadLabel(filename, resizer=None):
 	im = np.array(Image.open(filename))
 	Dtype = im.dtype
 	
-	if resize:
-		res = LabelResizer(LabelSize, BoxSize)
-		im = res.resize(im)
+	if resizer!=None
+		im = resizer.resize(im)
 	
 	im = im.reshape(im.shape[0],im.shape[1],1)
 	im = np.array(im, Dtype)
@@ -66,7 +65,7 @@ def LoadLabel(filename, resize=False):
 	im = im.transpose((2,0,1))
 	return im
 
-def LoadImage(filename, flow_x=None, flow_y=None, resize=False):
+def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
 	im = np.array(Image.open(in_))
 	Dtype = im.dtype
 	im = im[:,:,::-1]	# reverse channels of image data
@@ -81,8 +80,7 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=False):
 		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
 		im = np.concatenate((im, flow_im), axis=2)
 	
-	if resize:
-		res = ImageResizer(RSize, BoxSize)
+	if resizer!=None:
 		im_res = res.resize(im[:,:,:3])
 		for i in range(3, im.shape[2]):
 			flow_im_res = res.resize(im[:,:,i])
@@ -91,17 +89,19 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=False):
 		im = im_res
 		
 	im = np.array(im,Dtype)
-	RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
-	
 	im = im.transpose((2,0,1))
+	# shape channels*width*height, e.g. 3*640*420
 	return im
 
 def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
+	resizer = None
+	if resize:	
+		resizer = LabelResizer(LabelSize, BoxSize)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
-			im = LoadLabel(in_)
+			im = LoadLabel(in_, resizer)
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 	in_db.close()
@@ -111,10 +111,14 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
+	resizer = None
+	if resize:
+		resizer = ImageResizer(RSize, BoxSize)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
-			im = LoadImage(in_)
+			im = LoadImage(in_, flow_x, flow_y, resizer)
+			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 	in_db.close()
