@@ -5,10 +5,13 @@ import matplotlib.pyplot as plt
 import scipy
 import os
 import caffe
+import random
 import lmdb
 import caffe.proto.caffe_pb2
 from caffe.io import datum_to_array
-from convert_to_lmdb_flow import LoadImage, LoadLabel
+from convert_to_lmdb_flow import LoadImage, LoadLabel, ImageResizer, LabelResizer
+
+
 
 # Load Image data to a dictionary
 def LoadImagePaths(image_path):
@@ -40,8 +43,6 @@ def confcount(confcounts, pr, gt):
 	return confcounts
 
 def acc_accumulator(class_acc, pr, gt):
-	print pr.shape, gt.shape
-	print (pr==0).shape, (gt==0).shape, ((gt==0) & (pr==0)).shape
 	for i in range(0, numclasses):
 		class_acc[i+numclasses] += np.sum(gt==i)
 		class_acc[i] += np.sum((gt==i) & (pr==i))
@@ -54,22 +55,28 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	acc = []
 	class_acc = np.zeros(numclasses*2)
 	confcounts = np.zeros((numclasses, numclasses))
-	resizer = None if not resize else ImageResizer(LabelSize, BoxSize)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize)
+	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize)
 
 	# load net
 	net = caffe.Net(deploy_file, model_file, caffe.TEST)
+	print len(image_dict.keys())
+	
 	for key in image_dict.keys():
+		print key
 		img_path = image_dict[key]
 		label_path = label_dict[key]
 		flow_x_path = flow_x_dict[key] if flow_x_dict!=None and (key in flow_x_dict.keys()) else None
 		flow_y_path = flow_y_dict[key] if flow_y_dict!=None and (key in flow_y_dict.keys()) else None
 		
 		save_path = os.path.join(pred_visual_dir, '{version}_{idx}.png'.format(version=v, idx=key))
-		if ((not shortcut_inference) or (not os.path.exists(file_path))):
+		if ((not shortcut_inference) or (not os.path.exists(save_path))):
 			im = LoadImage(img_path, flow_x_path, flow_y_path, resizer) 
 			in_ = im.astype(np.float32)
+			in_ = in_.transpose((1,2,0))
 			# subtract mean from RGB
 			in_ -= np.array(input_RGB_mean[v], dtype=np.float32)
+			in_ = in_.transpose((2,0,1))
 
 			# shape for input (data blob is N x C x H x W), set data
 			net.blobs['data'].reshape(1, *in_.shape)
@@ -82,13 +89,15 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 			scipy.misc.imsave(save_path, out)
 		else:
 			out = scipy.misc.imread(save_path)
-	
-		L = LoadLabel(label_path)
-		out = resizer.upsample(out, L.shape)
 		
+		L = np.array(LoadLabel(label_path), dtype=np.uint8)
+		L = L.reshape(L.shape[1], L.shape[2])
+		out = labelresizer.upsample(out, L.shape)
+		out = np.array(out, dtype=np.uint8)
+
 		if eval_metric=='pixel_accuracy':
 			acc += [np.mean(out==L)]
-			print('{version}_{idx} acc={acc}'.format(version=v, idx=in_idx, acc=np.mean(out==L)))
+			print('{version}_{idx} acc={acc} totalmatch={sum_pixel}'.format(version=v, idx=key, acc=np.mean(out==L), sum_pixel = np.sum(out==L)))
 		elif eval_metric=='class_accuracy':
 			# sum of class accuracy
 			class_acc = acc_accumulator(class_acc, out, L)
@@ -151,6 +160,12 @@ def eval(inputs, inputs_Label, inputs_flow_x, inputs_flow_y, dataset):
 
 if __name__=='__main__':
 
+	resize = True
+	RSize = (200, 200)
+	LabelSize = (200, 200)
+	nopadding = False
+	useflow = False
+	
 	#MODIFY ME
 	if False:
 		# NOT tested
@@ -179,9 +194,9 @@ if __name__=='__main__':
 		snapshot = os.path.join(work_dir, 'snapshots_gcfvshuffle200200/train_lr1e-10/_iter_{snapshot_id}.caffemodel')
 		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_gcfvshuffle200200/train_lr1e-10/_iter_{snapshot_id}')
 		
-		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frame/{id}.jpg'
+		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
-		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frame/{id}.jpg'
+		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
 		test_label_data = '/lustre/yixi/data/gcfv_dataset/external_validation/ground_truth/labels/{id}_gt.png'
 		train_flow_x = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.f1.flow_x.png'
 		train_flow_y = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.f1.flow_y.png'
@@ -190,13 +205,12 @@ if __name__=='__main__':
 
 		iter = range(30000, 25000, -5000)
 		
-		RSize = (200, 200)
 		BoxSize = None
-		
+			
 		numclasses = 9
 		interested_class = range(0, numclasses)
 		
-		eval_metric = 'class_accuracy'
+		eval_metric = 'pixel_accuracy'
 		input_RGB_mean = {'Train':(83.3774396271, 87.3343435075, 86.27596998),
 				'Test':(83.3774396271, 87.3343435075, 86.27596998)}
 		shortcut_inference = True
