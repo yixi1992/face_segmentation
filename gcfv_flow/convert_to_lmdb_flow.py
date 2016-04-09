@@ -71,12 +71,12 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
 	im = im[:,:,::-1]	# reverse channels of image data
 	
 	if (flow_x!=None):
-		flow_im = np.array(Image.open(flow_x[key]))
+		flow_im = np.array(Image.open(flow_x))
 		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
 		im = np.concatenate((im, flow_im), axis=2)
 		
 	if (flow_y!=None):
-		flow_im = np.array(Image.open(flow_y[key]))
+		flow_im = np.array(Image.open(flow_y))
 		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
 		im = np.concatenate((im, flow_im), axis=2)
 	
@@ -117,7 +117,7 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
-			im = LoadImage(in_, flow_x, flow_y, resizer)
+			im = LoadImage(in_, flow_x[key], flow_y[key], resizer)
 			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
