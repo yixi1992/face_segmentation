@@ -95,9 +95,7 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
 
 def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
-	resizer = None
-	if resize:	
-		resizer = LabelResizer(LabelSize, BoxSize)
+	resizer = None if !resize else LabelResizer(LabelSize, BoxSize)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
@@ -111,9 +109,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None
-	if resize:
-		resizer = ImageResizer(RSize, BoxSize)
+	resizer = None if !resize else ImageResizer(RSize, BoxSize)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
