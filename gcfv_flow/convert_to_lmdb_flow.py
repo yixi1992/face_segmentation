@@ -55,12 +55,14 @@ class LabelResizer(Resizer):
 		im = Image.fromarray(im)
 		if self.nopadding:
 			res_im = im.resize(ImgSize, Image.NEAREST)
-			return res_im
+			return np.array(res_im)
 
 		box_size = self.box_size
 		box_size = (max(ImgSize[0], ImgSize[1]), max(ImgSize[0], ImgSize[1])) if box_size==None else box_size
-		res_im = im.resize(ImgSize, Image.NEAREST)
+		res_im = im.resize(box_size, Image.NEAREST)
+		res_im = np.array(res_im)
 		res_im = res_im[0:ImgSize[0], 0:ImgSize[1]]
+		print '3', res_im.shape
 		return res_im
 
 
@@ -179,11 +181,13 @@ if __name__=='__main__':
 		# TODO modify to dict!!!!!!!!!!!!
 		inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
 		shuffle(inputs_Train)
-		inputs_Test = inputs_Train[:NumberTest]
-		inputs_Train = inputs_Train[NumberTest:]
-		inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
-		inputs_Test_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Test]
-		
+		inputs_Test = dict(inputs_Train[:NumberTest])
+		inputs_Train = dict(inputs_Train[NumberTest:])
+		inputs_Train_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Train.keys()])
+		inputs_Test_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Test.keys()])
+		Train_keys = inputs_Train.keys()
+		Test_keys = inputs_Test.keys()
+
 		flow_x_Train = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
 		flow_x_Test = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
 		flow_y_Train = None if not useflow else dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
