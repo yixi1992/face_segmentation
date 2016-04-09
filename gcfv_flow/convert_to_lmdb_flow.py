@@ -14,97 +14,6 @@ import os
 import shutil
 import random
 
-resize = True
-# NumberTrain = 20 # Number of Training Images
-NumberTest = 50 # Number of Testing Images
-RSize = (200, 200)
-LabelSize = (200, 200)
-nopadding = False
-useflow = False
-
-if False:
-	lmdb_dir = 'mass_lmdb'
-	train_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Train_RGB/{id}.bmp'
-	test_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Test_RGB/{id}.bmp'
-	train_label_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Train_Labels/labels/{id}.png'
-	test_label_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Test_Labels/labels/{id}.png'
-	
-	inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
-	inputs_Test = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( test_data.format(id='*')))]
-	inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
-	inputs_Test_Label = [(id, test_label_data.format(id=id)) for (id,y) in inputs_Test]
-
-
-if False:
-	lmdb_dir = 'camvid' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
-	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
-	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
-	flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
-	flow_y = '/lustre/yixi/data/CamVid/flow/{id}.flow_y.png'
-	
-	BoxSize = (960, 960)
-	NumLabels = 32
-	BackGroundLabel = 32
-
-	inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
-	shuffle(inputs_Train)
-	inputs_Test = inputs_Train[:NumberTest]
-	inputs_Train = inputs_Train[NumberTest:]
-	inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
-	inputs_Test_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Test]
-	
-	if useflow:
-		flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
-		flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
-		flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
-		flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
-	else:
-		flow_x_Train = None
-		flow_x_Test = None
-		flow_y_Train = None
-		flow_y_Test = None
-
-if True:
-	lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
-	train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
-	train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
-	test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
-	test_label_data = '/lustre/yixi/data/gcfv_dataset/external_validation/ground_truth/labels/{id}_gt.png'
-
-	BoxSize = None # None is padding to the square of the longer edge
-
-	NumLabels = 8
-	BackGroundLabel = 0
-	
-	inputs_Train = dict([(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))])
-	inputs_Train_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( train_label_data.format(id='*')))])
-	Train_keys = [i for i in inputs_Train.keys() if i in inputs_Train_Label.keys()]
-	shuffle(Train_keys)
-	print Train_keys
-
-	inputs_Test = dict([(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( test_data.format(id='*')))])
-	inputs_Test_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( test_label_data.format(id='*')))])
-	Test_keys = [i for i in inputs_Test.keys() if i in inputs_Test_Label.keys()]
-	shuffle(Test_keys)
-
-
-	NumberTest = len(inputs_Test)
-
-	print len(inputs_Train), '=', len(inputs_Train_Label), len(inputs_Test), '=', len(inputs_Test_Label)
-
-
-
-	if useflow:
-		flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
-		flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
-		flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
-		flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
-	else:
-		flow_x_Train = None
-		flow_x_Test = None
-		flow_y_Train = None
-		flow_y_Test = None
-
 
 
 
@@ -142,26 +51,57 @@ class LabelResizer(Resizer):
 		res_im = pad_im.resize(self.size, Image.NEAREST)
 		return np.array(res_im)
 
+def LoadLabel(filename, resize=False):
+	im = np.array(Image.open(filename))
+	Dtype = im.dtype
+	
+	if resize:
+		res = LabelResizer(LabelSize, BoxSize)
+		im = res.resize(im)
+	
+	im = im.reshape(im.shape[0],im.shape[1],1)
+	im = np.array(im, Dtype)
+	#print np.amin(im),np.amax(im), im.shape
+	
+	im = im.transpose((2,0,1))
+	return im
+
+def LoadImage(filename, flow_x=None, flow_y=None, resize=False):
+	im = np.array(Image.open(in_))
+	Dtype = im.dtype
+	im = im[:,:,::-1]	# reverse channels of image data
+	
+	if (flow_x!=None):
+		flow_im = np.array(Image.open(flow_x[key]))
+		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
+		im = np.concatenate((im, flow_im), axis=2)
+		
+	if (flow_y!=None):
+		flow_im = np.array(Image.open(flow_y[key]))
+		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
+		im = np.concatenate((im, flow_im), axis=2)
+	
+	if resize:
+		res = ImageResizer(RSize, BoxSize)
+		im_res = res.resize(im[:,:,:3])
+		for i in range(3, im.shape[2]):
+			flow_im_res = res.resize(im[:,:,i])
+			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
+			im_res = np.concatenate((im_res, flow_im_res), axis=2)
+		im = im_res
+		
+	im = np.array(im,Dtype)
+	RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
+	
+	im = im.transpose((2,0,1))
+	return im
 
 def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
-			im = np.array(Image.open(in_))
-#			print in_idx, key, in_
-			Dtype = im.dtype
-			
-			if resize:
-				res = LabelResizer(LabelSize, BoxSize)
-				im = res.resize(im)
-			
-			im = im.reshape(im.shape[0],im.shape[1],1)
-			im = np.array(im, Dtype)
-			#print np.amin(im),np.amax(im), im.shape
-			
-			print im.shape
-			im = im.transpose((2,0,1))
+			im = LoadLabel(in_)
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 	in_db.close()
@@ -174,35 +114,7 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
-			im = np.array(Image.open(in_))
-#			print in_idx, key, in_
-			Dtype = im.dtype
-			im = im[:,:,::-1]	# reverse channels of image data
-			
-			if (flow_x!=None):
-				flow_im = np.array(Image.open(flow_x[key]))
-				flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
-				im = np.concatenate((im, flow_im), axis=2)
-				
-			if (flow_y!=None):
-				flow_im = np.array(Image.open(flow_y[key]))
-				flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
-				im = np.concatenate((im, flow_im), axis=2)
-			
-			if resize:
-				res = ImageResizer(RSize, BoxSize)
-				im_res = res.resize(im[:,:,:3])
-				for i in range(3, im.shape[2]):
-					flow_im_res = res.resize(im[:,:,i])
-					flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
-					im_res = np.concatenate((im_res, flow_im_res), axis=2)
-				im = im_res
-				
-			im = np.array(im,Dtype)
-			RGB_sum = RGB_sum + np.mean(im, axis=(0,1))
-			
-			print im.shape
-			im = im.transpose((2,0,1))
+			im = LoadImage(in_)
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 	in_db.close()
@@ -215,26 +127,121 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 	f.close()
 
 
-if os.path.exists(lmdb_dir):
-	shutil.rmtree(lmdb_dir, ignore_errors=True)
 
-os.makedirs(lmdb_dir)
+if __name__=='__main__':
+	resize = True
+	# NumberTrain = 20 # Number of Training Images
+	NumberTest = 50 # Number of Testing Images
+	RSize = (200, 200)
+	LabelSize = (200, 200)
+	nopadding = False
+	useflow = False
 
-############################# Creating LMDB for Training Data ##############################
-print("Creating Training Data LMDB File ..... ")
-createLMDBImage(os.path.join(lmdb_dir,'train-lmdb'), int(1e14), inputs_Train, flow_x=flow_x_Train, flow_y=flow_y_Train, resize=resize, keys=Train_keys)
-
- 
-############################# Creating LMDB for Training Labels ##############################
-print("Creating Training Label LMDB File ..... ")
-createLMDBLabel(os.path.join(lmdb_dir,'train-label-lmdb'), int(1e12), inputs_Train_Label, resize=resize, keys=Train_keys)
-
-
-############################# Creating LMDB for Testing Data ##############################
-print("Creating Testing Data LMDB File ..... ")
-createLMDBImage(os.path.join(lmdb_dir,'test-lmdb'), int(1e14), inputs_Test, flow_x=flow_x_Test, flow_y=flow_y_Test, resize=resize, keys=Test_keys)
+	if False:
+		lmdb_dir = 'mass_lmdb'
+		train_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Train_RGB/{id}.bmp'
+		test_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Test_RGB/{id}.bmp'
+		train_label_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Train_Labels/labels/{id}.png'
+		test_label_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Test_Labels/labels/{id}.png'
+		
+		inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
+		inputs_Test = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( test_data.format(id='*')))]
+		inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
+		inputs_Test_Label = [(id, test_label_data.format(id=id)) for (id,y) in inputs_Test]
 
 
-############################# Creating LMDB for Testing Labels ##############################
-print("Creating Testing Label LMDB File ..... ")
-createLMDBLabel(os.path.join(lmdb_dir,'test-label-lmdb'), int(1e12), inputs_Test_Label, resize=resize, keys=Test_keys)
+	if False:
+		lmdb_dir = 'camvid' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
+		train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
+		flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
+		flow_y = '/lustre/yixi/data/CamVid/flow/{id}.flow_y.png'
+		
+		BoxSize = (960, 960)
+		NumLabels = 32
+		BackGroundLabel = 32
+
+		inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
+		shuffle(inputs_Train)
+		inputs_Test = inputs_Train[:NumberTest]
+		inputs_Train = inputs_Train[NumberTest:]
+		inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
+		inputs_Test_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Test]
+		
+		if useflow:
+			flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
+			flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
+			flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
+			flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
+		else:
+			flow_x_Train = None
+			flow_x_Test = None
+			flow_y_Train = None
+			flow_y_Test = None
+
+	if True:
+		lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
+		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
+		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
+		test_label_data = '/lustre/yixi/data/gcfv_dataset/external_validation/ground_truth/labels/{id}_gt.png'
+
+		BoxSize = None # None is padding to the square of the longer edge
+
+		NumLabels = 8
+		BackGroundLabel = 0
+		
+		inputs_Train = dict([(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))])
+		inputs_Train_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( train_label_data.format(id='*')))])
+		Train_keys = [i for i in inputs_Train.keys() if i in inputs_Train_Label.keys()]
+		shuffle(Train_keys)
+		print Train_keys
+
+		inputs_Test = dict([(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( test_data.format(id='*')))])
+		inputs_Test_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( test_label_data.format(id='*')))])
+		Test_keys = [i for i in inputs_Test.keys() if i in inputs_Test_Label.keys()]
+		shuffle(Test_keys)
+
+
+		NumberTest = len(inputs_Test)
+
+		print len(inputs_Train), '=', len(inputs_Train_Label), len(inputs_Test), '=', len(inputs_Test_Label)
+
+
+
+		if useflow:
+			flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
+			flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
+			flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
+			flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
+		else:
+			flow_x_Train = None
+			flow_x_Test = None
+			flow_y_Train = None
+			flow_y_Test = None
+
+
+
+	if os.path.exists(lmdb_dir):
+		shutil.rmtree(lmdb_dir, ignore_errors=True)
+
+	os.makedirs(lmdb_dir)
+
+	############################# Creating LMDB for Training Data ##############################
+	print("Creating Training Data LMDB File ..... ")
+	createLMDBImage(os.path.join(lmdb_dir,'train-lmdb'), int(1e14), inputs_Train, flow_x=flow_x_Train, flow_y=flow_y_Train, resize=resize, keys=Train_keys)
+
+	 
+	############################# Creating LMDB for Training Labels ##############################
+	print("Creating Training Label LMDB File ..... ")
+	createLMDBLabel(os.path.join(lmdb_dir,'train-label-lmdb'), int(1e12), inputs_Train_Label, resize=resize, keys=Train_keys)
+
+
+	############################# Creating LMDB for Testing Data ##############################
+	print("Creating Testing Data LMDB File ..... ")
+	createLMDBImage(os.path.join(lmdb_dir,'test-lmdb'), int(1e14), inputs_Test, flow_x=flow_x_Test, flow_y=flow_y_Test, resize=resize, keys=Test_keys)
+
+
+	############################# Creating LMDB for Testing Labels ##############################
+	print("Creating Testing Label LMDB File ..... ")
+	createLMDBLabel(os.path.join(lmdb_dir,'test-label-lmdb'), int(1e12), inputs_Test_Label, resize=resize, keys=Test_keys)
