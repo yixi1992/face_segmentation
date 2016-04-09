@@ -7,12 +7,12 @@ layer {
     phase: TRAIN
   }
   transform_param {
-	mean_value: 83.3774396271
-  	mean_value: 87.3343435075
-  	mean_value: 86.27596998
+	mean_value: 82
+  	mean_value: 86
+  	mean_value: 85
   }
   data_param {
-    source: "../gcfv200200_lmdb/train-lmdb"
+    source: "../gcfvshuffle200200_lmdb/train-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -25,7 +25,7 @@ layer {
     phase: TRAIN
   }
   data_param {
-    source: "../gcfv200200_lmdb/train-label-lmdb"
+    source: "../gcfvshuffle200200_lmdb/train-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -43,7 +43,7 @@ layer {
 	mean_value: 82.5061055614
   }
   data_param {
-    source: "../gcfv200200_lmdb/test-lmdb"
+    source: "../gcfvshuffle200200_lmdb/test-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -56,7 +56,7 @@ layer {
     phase: TEST
   }
   data_param {
-    source: "../gcfv200200_lmdb/test-label-lmdb"
+    source: "../gcfvshuffle200200_lmdb/test-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -561,6 +561,12 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer {
@@ -580,6 +586,12 @@ layer {
     num_output: 9
     kernel_size: 1
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'score-pool4' bottom: 'upscore2'
@@ -608,6 +620,12 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer {
@@ -627,6 +645,13 @@ layer {
     num_output: 9
     kernel_size: 1
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
+  }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'score-pool3' bottom: 'score4'
@@ -654,6 +679,13 @@ layer {
     bias_term: false
     kernel_size: 16
     stride: 8
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
+  }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'bigscore' bottom: 'data' top: 'score' }
