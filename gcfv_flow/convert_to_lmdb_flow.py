@@ -18,17 +18,17 @@ import random
 
 
 class Resizer:
-	def __init__(self, size, box_size):
+	def __init__(self, size, box_size, nopadding=False):
 		self.size = size
 		self.box_size = box_size
+		self.nopadding = nopadding
 		
 	def padarray(self, im, padval):
-		if nopadding:
+		if self.nopadding:
 			return im
 		
 		box_size = self.box_size
-		if box_size==None:
-			box_size = (max(im.shape[0], im.shape[1]), max(im.shape[0], im.shape[1]))
+		box_size = (max(im.shape[0], im.shape[1]), max(im.shape[0], im.shape[1])) if box_size==None else box_size
 		
 		pad_size = (box_size[0]-im.shape[0], box_size[1]-im.shape[1])
 		if im.ndim==2:
@@ -50,12 +50,26 @@ class LabelResizer(Resizer):
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.NEAREST)
 		return np.array(res_im)
+	
+	def upsample(self, im, ImgSize):
+		im = Image.fromarray(im)
+		if self.nopadding:
+			res_im = im.resize(ImgSize, Image.NEAREST)
+			return res_im
+
+		box_size = self.box_size
+		box_size = (max(ImgSize[0], ImgSize[1]), max(ImgSize[0], ImgSize[1])) if box_size==None else box_size
+		res_im = im.resize(ImgSize, Image.NEAREST)
+		res_im = res_im[0:ImgSize[0], 0:ImgSize[1]]
+		return res_im
+
+
 
 def LoadLabel(filename, resizer=None):
 	im = np.array(Image.open(filename))
 	Dtype = im.dtype
 	
-	if resizer!=None
+	if resizer!=None:
 		im = resizer.resize(im)
 	
 	im = im.reshape(im.shape[0],im.shape[1],1)
@@ -65,8 +79,8 @@ def LoadLabel(filename, resizer=None):
 	im = im.transpose((2,0,1))
 	return im
 
-def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
-	im = np.array(Image.open(in_))
+def LoadImage(filename, flow_x=None, flow_y=None, resizer=None):
+	im = np.array(Image.open(filename))
 	Dtype = im.dtype
 	im = im[:,:,::-1]	# reverse channels of image data
 	
@@ -81,9 +95,9 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
 		im = np.concatenate((im, flow_im), axis=2)
 	
 	if resizer!=None:
-		im_res = res.resize(im[:,:,:3])
+		im_res = resizer.resize(im[:,:,:3])
 		for i in range(3, im.shape[2]):
-			flow_im_res = res.resize(im[:,:,i])
+			flow_im_res = resizer.resize(im[:,:,i])
 			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
 			im_res = np.concatenate((im_res, flow_im_res), axis=2)
 		im = im_res
@@ -95,7 +109,7 @@ def LoadImage(filename, flow_x=None, flow_y=None, resize=None):
 
 def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
-	resizer = None if !resize else LabelResizer(LabelSize, BoxSize)
+	resizer = None if not resize else LabelResizer(LabelSize, BoxSize, nopadding)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			in_ = inputs_Train[key]
@@ -109,11 +123,12 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None if !resize else ImageResizer(RSize, BoxSize)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
+			print in_idx
 			in_ = inputs_Train[key]
-			im = LoadImage(in_, flow_x[key], flow_y[key], resizer)
+			im = LoadImage(in_, flow_x[key] if flow_x!=None and (key in flow_x.keys()) else None, flow_y[key] if flow_y!=None and (key in flow_y.keys()) else None, resizer)
 			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
@@ -135,7 +150,7 @@ if __name__=='__main__':
 	RSize = (200, 200)
 	LabelSize = (200, 200)
 	nopadding = False
-	useflow = False
+	useflow = True
 
 	if False:
 		lmdb_dir = 'mass_lmdb'
@@ -160,7 +175,8 @@ if __name__=='__main__':
 		BoxSize = (960, 960)
 		NumLabels = 32
 		BackGroundLabel = 32
-
+		
+		# TODO modify to dict!!!!!!!!!!!!
 		inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
 		shuffle(inputs_Train)
 		inputs_Test = inputs_Train[:NumberTest]
@@ -168,16 +184,10 @@ if __name__=='__main__':
 		inputs_Train_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Train]
 		inputs_Test_Label = [(id, train_label_data.format(id=id)) for (id,y) in inputs_Test]
 		
-		if useflow:
-			flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
-			flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
-			flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
-			flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
-		else:
-			flow_x_Train = None
-			flow_x_Test = None
-			flow_y_Train = None
-			flow_y_Test = None
+		flow_x_Train = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
+		flow_x_Test = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
+		flow_y_Train = None if not useflow else dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
+		flow_y_Test = None if not useflow else dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
 
 	if True:
 		lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
@@ -185,9 +195,13 @@ if __name__=='__main__':
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
 		test_label_data = '/lustre/yixi/data/gcfv_dataset/external_validation/ground_truth/labels/{id}_gt.png'
+		train_flow_x = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.flow_x.png'
+		train_flow_y = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.flow_y.png'
+		test_flow_x = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.flow_x.png'
+		test_flow_y = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.flow_y.png'
 
 		BoxSize = None # None is padding to the square of the longer edge
-
+	
 		NumLabels = 8
 		BackGroundLabel = 0
 		
@@ -202,23 +216,15 @@ if __name__=='__main__':
 		Test_keys = [i for i in inputs_Test.keys() if i in inputs_Test_Label.keys()]
 		shuffle(Test_keys)
 
+		flow_x_Train = None if not useflow else dict([(id, train_flow_x.format(id=id)) for id in inputs_Train.keys()])
+		flow_x_Test = None if not useflow else dict([(id, test_flow_x.format(id=id)) for id in inputs_Test.keys()])
+		flow_y_Train = None if not useflow else dict([(id, train_flow_y.format(id=id)) for id in inputs_Train.keys()])
+		flow_y_Test = None if not useflow else dict([(id, test_flow_y.format(id=id)) for id in inputs_Test.keys()])
+
 
 		NumberTest = len(inputs_Test)
 
 		print len(inputs_Train), '=', len(inputs_Train_Label), len(inputs_Test), '=', len(inputs_Test_Label)
-
-
-
-		if useflow:
-			flow_x_Train = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
-			flow_x_Test = dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
-			flow_y_Train = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
-			flow_y_Test = dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
-		else:
-			flow_x_Train = None
-			flow_x_Test = None
-			flow_y_Train = None
-			flow_y_Test = None
 
 
 
