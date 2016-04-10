@@ -62,7 +62,6 @@ class LabelResizer(Resizer):
 		res_im = im.resize(box_size, Image.NEAREST)
 		res_im = np.array(res_im)
 		res_im = res_im[0:ImgSize[0], 0:ImgSize[1]]
-		print '3', res_im.shape
 		return res_im
 
 
@@ -130,7 +129,7 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 		for (in_idx, key) in enumerate(keys):
 			print in_idx
 			in_ = inputs_Train[key]
-			im = LoadImage(in_, flow_x[key] if flow_x!=None and (key in flow_x.keys()) else None, flow_y[key] if flow_y!=None and (key in flow_y.keys()) else None, resizer)
+			im = LoadImage(in_, flow_x[key] if flow_x!=None and (key in flow_x) else None, flow_y[key] if flow_y!=None and (key in flow_y) else None, resizer)
 			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
@@ -178,7 +177,6 @@ if __name__=='__main__':
 		NumLabels = 32
 		BackGroundLabel = 32
 		
-		# TODO modify to dict!!!!!!!!!!!!
 		inputs_Train = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
 		shuffle(inputs_Train)
 		inputs_Test = dict(inputs_Train[:NumberTest])
@@ -188,10 +186,10 @@ if __name__=='__main__':
 		Train_keys = inputs_Train.keys()
 		Test_keys = inputs_Test.keys()
 
-		flow_x_Train = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Train])
-		flow_x_Test = None if not useflow else dict([(id, flow_x.format(id=id)) for (id,y) in inputs_Test])
-		flow_y_Train = None if not useflow else dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Train])
-		flow_y_Test = None if not useflow else dict([(id, flow_y.format(id=id)) for (id,y) in inputs_Test])
+		flow_x_Train = None if not useflow else dict([(id, flow_x.format(id=id)) for id in inputs_Train])
+		flow_x_Test = None if not useflow else dict([(id, flow_x.format(id=id)) for id in inputs_Test])
+		flow_y_Train = None if not useflow else dict([(id, flow_y.format(id=id)) for id in inputs_Train])
+		flow_y_Test = None if not useflow else dict([(id, flow_y.format(id=id)) for id in inputs_Test])
 
 	if True:
 		lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
@@ -205,7 +203,6 @@ if __name__=='__main__':
 		test_flow_y = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.flow_y.png'
 
 		BoxSize = None # None is padding to the square of the longer edge
-	
 		NumLabels = 8
 		BackGroundLabel = 0
 		
@@ -213,7 +210,6 @@ if __name__=='__main__':
 		inputs_Train_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( train_label_data.format(id='*')))])
 		Train_keys = [i for i in inputs_Train.keys() if i in inputs_Train_Label.keys()]
 		shuffle(Train_keys)
-		print Train_keys
 
 		inputs_Test = dict([(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( test_data.format(id='*')))])
 		inputs_Test_Label = dict([(os.path.splitext(os.path.basename(x))[0].replace('_gt',''), x) for x in sorted(glob.glob( test_label_data.format(id='*')))])

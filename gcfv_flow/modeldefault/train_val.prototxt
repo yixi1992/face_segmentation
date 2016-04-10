@@ -67,11 +67,11 @@ layer {
   bottom: "data"
   top: "conv1_1"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -93,7 +93,7 @@ layer {
   bottom: "conv1_1"
   top: "conv1_2"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
@@ -130,11 +130,11 @@ layer {
   bottom: "pool1"
   top: "conv2_1"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -156,11 +156,11 @@ layer {
   bottom: "conv2_1"
   top: "conv2_2"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -193,11 +193,11 @@ layer {
   bottom: "pool2"
   top: "conv3_1"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -219,11 +219,11 @@ layer {
   bottom: "conv3_1"
   top: "conv3_2"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -245,11 +245,11 @@ layer {
   bottom: "conv3_2"
   top: "conv3_3"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -282,11 +282,11 @@ layer {
   bottom: "pool3"
   top: "conv4_1"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -308,11 +308,11 @@ layer {
   bottom: "conv4_1"
   top: "conv4_2"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -334,11 +334,11 @@ layer {
   bottom: "conv4_2"
   top: "conv4_3"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -371,11 +371,11 @@ layer {
   bottom: "pool4"
   top: "conv5_1"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -397,11 +397,11 @@ layer {
   bottom: "conv5_1"
   top: "conv5_2"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -423,11 +423,11 @@ layer {
   bottom: "conv5_2"
   top: "conv5_3"
   param {
-    lr_mult: 1
+    lr_mult: 0
     decay_mult: 1
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -540,7 +540,8 @@ layer {
     kernel_size: 1
     engine: CAFFE
     weight_filler {
-    	type: "xavier"
+    	type: "gaussian"
+	std: 0.01
     }
     bias_filler {
     	type: "constant"
@@ -561,12 +562,6 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
-    weight_filler {
-    	type: "xavier"
-    }
-    bias_filler {
-    	type: "constant"
-    }
   }
 }
 layer {
@@ -587,7 +582,8 @@ layer {
     kernel_size: 1
     engine: CAFFE
     weight_filler {
-    	type: "xavier"
+    	type: "gaussian"
+	std: 0.01
     }
     bias_filler {
     	type: "constant"
@@ -620,12 +616,6 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
-    weight_filler {
-    	type: "xavier"
-    }
-    bias_filler {
-    	type: "constant"
-    }
   }
 }
 layer {
@@ -646,7 +636,8 @@ layer {
     kernel_size: 1
     engine: CAFFE
     weight_filler {
-    	type: "xavier"
+   	type: "gaussian"
+	std: 0.01
     }
     bias_filler {
     	type: "constant"
@@ -678,12 +669,6 @@ layer {
     bias_term: false
     kernel_size: 16
     stride: 8
-    weight_filler {
-    	type: "xavier"
-    }
-    bias_filler {
-    	type: "constant"
-    }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'bigscore' bottom: 'data' top: 'score' }
