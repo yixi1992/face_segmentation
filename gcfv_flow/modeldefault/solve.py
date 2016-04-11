@@ -32,12 +32,12 @@ def interp_surgery(net, layers):
 # a fully convolutional VGG16 net.
 # http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
 # from VGG16
-#base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
+base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfv200200/vgg_lr1e-10/_iter_5000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/vgg_lr1e-10/_iter_45000.caffemodel'
 
 # from Camvid finetuned
-base_weights = 'camvid_modeldefault_surg.caffemodel'
+#base_weights = 'camvid_modeldefault_surg.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfv200200/train_lr1e-10/_iter_7000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfv200200/train_lr1e-10_7000/_iter_15000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfv200200/train_lr1e-10_7000_15000/_iter_30000.caffemodel'
