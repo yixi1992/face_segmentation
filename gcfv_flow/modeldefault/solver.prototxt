@@ -1,4 +1,4 @@
-net: "train_val.prototxt"
+net: "train_val_modeldefault.prototxt"
 test_iter: 7071
 # make test net, but don't invoke it from the solver itself
 test_interval: 1000
@@ -14,5 +14,5 @@ iter_size: 1
 max_iter: 80000
 weight_decay: 0.0005 
 snapshot: 1000
-snapshot_prefix: "snapshots_gcfv200200/train_lr1e-10/"
+snapshot_prefix: "snapshots_gcfvshuffle200200/camvid_reproduce_lr1e-10/"
 test_initialization: true
