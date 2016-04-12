@@ -67,8 +67,8 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	acc = []
 	class_acc = np.zeros(numclasses*2)
 	confcounts = np.zeros((numclasses, numclasses))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_value)
-	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_values, flow_pad_value=128)
+	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize, nopadding)
 
 	# load net
 	caffe.set_mode_gpu()
@@ -253,7 +253,7 @@ if __name__=='__main__':
 		NumLabels = 8
 		BackGroundLabel = 0
 		useflow = True
-		mean_value = (121.364250092, 126.289872692, 124.244447077, 127.953835502, 127.581663093)
+		mean_values = [121.364250092, 126.289872692, 124.244447077] #128 for any flows
 	
 
 		iter = range(5000, 4000, -1000)

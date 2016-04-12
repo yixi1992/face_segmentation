@@ -18,11 +18,12 @@ import random
 
 
 class Resizer:
-	def __init__(self, size, box_size, nopadding=False, padval=None):
+	def __init__(self, size, box_size, nopadding=False, RGB_pad_value=None, flow_pad_value=128):
 		self.size = size
 		self.box_size = box_size
 		self.nopadding = nopadding
-		self.padval = padval
+		self.RGB_pad_value = RGB_pad_value
+		self.flow_pad_value = flow_pad_value
 		
 	def padarray(self, im, padval):
 		if self.nopadding:
@@ -32,16 +33,16 @@ class Resizer:
 		box_size = (max(im.shape[0], im.shape[1]), max(im.shape[0], im.shape[1])) if box_size==None else box_size
 		
 		pad_size = (box_size[0]-im.shape[0], box_size[1]-im.shape[1])
-		if im.ndim==2:
-			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval)
-		else:
-			arrays = [np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval[ch]) for ch in range(im.shape[2])]
+		if im.ndim==2: #flow
+			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = self.flow_pad_value)
+		else: #RGB
+			arrays = [np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = self.RGB_pad_value[ch]) for ch in range(im.shape[2])]
 			pad_im = np.stack(arrays, axis=2)
 			print pad_im.shape
 		return pad_im
 
 class ImageResizer(Resizer):
-	def resize(self, im, padval):
+	def resize(self, im, padval=None):
 		pad_im = self.padarray(im, padval)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
@@ -99,7 +100,7 @@ def LoadImage(filename, flow_x=None, flow_y=None, resizer=None):
 		im = np.concatenate((im, flow_im), axis=2)
 	
 	if resizer!=None:
-		im_res = resizer.resize(im[:,:,:3], mean_values)
+		im_res = resizer.resize(im[:,:,:3])
 		for i in range(3, im.shape[2]):
 			flow_im_res = resizer.resize(im[:,:,i], 128)
 			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
@@ -127,7 +128,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_values)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			print in_idx
