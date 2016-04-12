@@ -18,10 +18,11 @@ import random
 
 
 class Resizer:
-	def __init__(self, size, box_size, nopadding=False):
+	def __init__(self, size, box_size, nopadding=False, padval=None):
 		self.size = size
 		self.box_size = box_size
 		self.nopadding = nopadding
+		self.padval = padval
 		
 	def padarray(self, im, padval):
 		if self.nopadding:
@@ -34,12 +35,14 @@ class Resizer:
 		if im.ndim==2:
 			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval)
 		else:
-			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1]), (0,0)), mode='constant', constant_values = padval)
+			pad_im = []
+			for ch in range(im.shape[2]):
+				pad_im = np.concatenate(pad_im, np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1]), (0,0)), mode='constant', constant_values = padval[ch]), axis=2)
 		return pad_im
 
 class ImageResizer(Resizer):
 	def resize(self, im):
-		pad_im = self.padarray(im, 0)
+		pad_im = self.padarray(im, self.padval)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
 		return np.array(res_im)
@@ -124,7 +127,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_value)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			print in_idx
@@ -135,7 +138,7 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 	in_db.close()
 	f = open(os.path.join(dir, 'RGB_mean'), 'w')
-	RGB_mean = RGB_sum/len(inputs_Train)
+	RGB_mean = RGB_sum/len(keys)
 	for i in range(RGB_mean.size):
 		f.write('mean_value: ' + str(RGB_mean[i]) + '\n')
 	for i in range(RGB_mean.size):
@@ -145,14 +148,6 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 
 
 if __name__=='__main__':
-	resize = True
-	# NumberTrain = 20 # Number of Training Images
-	NumberTest = 50 # Number of Testing Images
-	RSize = (200, 200)
-	LabelSize = (200, 200)
-	nopadding = False
-	useflow = True
-
 	if False:
 		lmdb_dir = 'mass_lmdb'
 		train_data = '/lustre/yixi/data/massimomauro-FASSEG-dataset-f93e332/V2/Train_RGB/{id}.bmp'
@@ -167,6 +162,13 @@ if __name__=='__main__':
 
 
 	if False:
+		resize = True
+		NumberTest = 50 # Number of Testing Images
+		RSize = (200, 200)
+		LabelSize = (200, 200)
+		nopadding = False
+		useflow = True
+		
 		lmdb_dir = 'camvid' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 		train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
@@ -192,6 +194,13 @@ if __name__=='__main__':
 		flow_y_Test = None if not useflow else dict([(id, flow_y.format(id=id)) for id in inputs_Test])
 
 	if True:
+		resize = True
+		RSize = (200, 200)
+		LabelSize = (200, 200)
+		nopadding = False
+		useflow = True
+		mean_value = (121.364250092, 126.289872692, 124.244447077, 127.953835502, 127.581663093)
+
 		lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
