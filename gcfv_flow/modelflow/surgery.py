@@ -8,8 +8,8 @@ import caffe
 
 # Load the fully convolutional network to transplant the parameters.
 net_full_conv = caffe.Net('deploy_modeldefault.prototxt', 
-                          '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/train_lr1e-10/_iter_30000.caffemodel', caffe.TEST)
-net = caffe.Net('/lustre/yixi/face_segmentation_finetune/flow/modeldefault/deploy.prototxt', '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/train_lr1e-10/_iter_30000.caffemodel', caffe.TEST)
+                          '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/vgg_lr1e-10/_iter_30000.caffemodel', caffe.TEST)
+net = caffe.Net('/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/deploy_modeldefault.prototxt', '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/vgg_lr1e-10/_iter_30000.caffemodel', caffe.TEST)
 
 
 params_full_conv = ['conv1_1_flow']
@@ -38,5 +38,5 @@ for pr, pr_conv in zip(params, params_full_conv):
 
 
 
-net_full_conv.save('modeldefaultflow.caffemodel')
+net_full_conv.save('vgg_modeldefault_surg.caffemodel')
 

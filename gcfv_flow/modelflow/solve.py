@@ -33,7 +33,11 @@ def interp_surgery(net, layers):
 # http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
 # from gcfv RGB trained /lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/train_lr1e-10/_iter_30000.caffemodel
 
-base_weights = 'modeldefaultflow.caffemodel'
+#Camvid finetuned gcfv RGB
+#base_weights = 'modeldefaultflow.caffemodel'
+
+#vgg
+base_weights = 'vgg_modeldefault_surg.caffemodel' 
 
 # init
 caffe.set_mode_gpu()
@@ -42,9 +46,8 @@ caffe.set_device(0)
 solver = caffe.SGDSolver('solver.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
-interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-interp_surgery(solver.net, interp_layers)
-print interp_layers
+#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+#interp_surgery(solver.net, interp_layers)
 print '----- yixi initialized params ----'
 layernames = solver.net.params.keys()
 for l in layernames:
