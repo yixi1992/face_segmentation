@@ -11,6 +11,18 @@ import caffe.proto.caffe_pb2
 from caffe.io import datum_to_array
 from convert_to_lmdb_flow import LoadImage, LoadLabel, ImageResizer, LabelResizer
 
+# Load LMDB data to a dictionary
+def LMDB2Dict(lmdb_directory):
+	D = dict()
+	lmdb_env = lmdb.open(lmdb_directory)
+	lmdb_txn = lmdb_env.begin()
+	lmdb_cursor = lmdb_txn.cursor()
+	datum = caffe.proto.caffe_pb2.Datum()
+	for key, value in lmdb_cursor:
+		datum.ParseFromString(value)
+		data = caffe.io.datum_to_array(datum)
+		D[key] = data
+	return D
 
 
 # Load Image data to a dictionary
@@ -28,7 +40,7 @@ def LoadFlowPaths(flow_path, keys=None):
 	if keys!=None:		
 		D = dict([(id, flow_path.format(id=id)) for id in keys]) 
 	else:
-		D = dict([(os.path.splitext(os.path.basename(x))[0].replace('.f1.flow_x','').replace('.f1.flow_y', ''), x) for x in sorted(glob.glob( flow_path.format(id='*')))]) 
+		D = dict([(os.path.splitext(os.path.basename(x))[0].replace('.flow_x','').replace('.flow_y', ''), x) for x in sorted(glob.glob( flow_path.format(id='*')))]) 
 	return D
 
 
@@ -55,15 +67,19 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	acc = []
 	class_acc = np.zeros(numclasses*2)
 	confcounts = np.zeros((numclasses, numclasses))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_value)
 	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize)
 
 	# load net
+	caffe.set_mode_gpu()
+	caffe.set_device(0)
 	net = caffe.Net(deploy_file, model_file, caffe.TEST)
 	print len(image_dict.keys())
 	
 	for key in image_dict.keys():
 		print key
+		#if random.randint(0,7000)>=5:
+		#	continue
 		img_path = image_dict[key]
 		label_path = label_dict[key]
 		flow_x_path = flow_x_dict[key] if flow_x_dict!=None and (key in flow_x_dict.keys()) else None
@@ -164,7 +180,6 @@ if __name__=='__main__':
 	RSize = (200, 200)
 	LabelSize = (200, 200)
 	nopadding = False
-	useflow = False
 	
 	#MODIFY ME
 	if False:
@@ -172,64 +187,103 @@ if __name__=='__main__':
 		lmdb_dir = 'mass_lmdb'
 
 	if False:
-		model = 'snapshots_camvid200200_train_lr1e-10'
-		lmdb_dir = '../camvid200200_lmdb'
-		work_dir = '/lustre/yixi/face_segmentation_finetune/flow/modeldefault'
+		model = 'snapshots_camvid200flow_modeldefaultflowsurg_lr1e-10_22000_1e-11'
+		work_dir = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp'
+		lmdb_dir = os.path.join(work_dir, '../camvid200flow_lmdb')
 		deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-		snapshot = os.path.join(work_dir, 'snapshots_camvid200200/train_lr1e-10/_iter_{snapshot_id}.caffemodel')
-		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200200/train_lr1e-10/_iter_{snapshot_id}')
-		iter = range(77000, 74000, -1000)
+		snapshot = os.path.join(work_dir, 'snapshots_camvid200flow/modeldefaultflowsurg_lr1e-10_22000_1e-11/_iter_{snapshot_id}.caffemodel')
+		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_camvid200flow/modeldefaultflowsurg_lr1e-10_22000_1e-11/_iter_{snapshot_id}')
+		
+		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
+		train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
+		flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
+		flow_y = '/lustre/yixi/data/CamVid/flow/{id}.flow_y.png'
+		
+		BoxSize = (960, 960)
+		NumLabels = 32
+		BackGroundLabel = 32
+		useflow = True
+		
+		iter = range(22000, 21000, -1000)
 		numclasses = 33
-		#interested_class = range(0, numclasses)
-		interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
+		interested_class = range(0, NumLabels)
+		#interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
 		eval_metric = 'eval_miu'
-		input_RGB_mean = {'Train':(78.1049806452, 76.5400646313, 74.0029471198),
+		if useflow:
+			input_RGB_mean = {'Train':(78.1049806452, 76.5400646313, 74.0029471198),
 				'Test':(78.1049806452, 76.5400646313, 74.0029471198)}
+		else:
+			input_RGB_mean = {'Train':(78.1049806452, 76.5400646313, 74.0029471198, 93, 97),
+				'Test':(78.1049806452, 76.5400646313, 74.0029471198, 93, 97)}
+
 		shortcut_inference = True
+		
+		inputs_Train_LMDB = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb'))
+		inputs_all = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
+		inputs_Test = dict([(i, y) for (i,y) in inputs_all if not (i in inputs_Train_LMDB)])
+		inputs_Train = dict([(i, y) for (i,y) in inputs_all if (i in inputs_Train_LMDB)])
+		inputs_Train_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Train.keys()])
+		inputs_Test_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Test.keys()])
+
+		flow_x_Train = None if not useflow else dict([(id, flow_x.format(id=id)) for id in inputs_Train])
+		flow_x_Test = None if not useflow else dict([(id, flow_x.format(id=id)) for id in inputs_Test])
+		flow_y_Train = None if not useflow else dict([(id, flow_y.format(id=id)) for id in inputs_Train])
+		flow_y_Test = None if not useflow else dict([(id, flow_y.format(id=id)) for id in inputs_Test])
+
+
 
 	if True:
-		model = 'modeldefault_snapshots_gcfvshuffle200200_train_lr1e-10'
-		work_dir = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault'
-		deploy_file = os.path.join(work_dir, 'deploy.prototxt')
-		snapshot = os.path.join(work_dir, 'snapshots_gcfvshuffle200200/train_lr1e-10/_iter_{snapshot_id}.caffemodel')
-		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_gcfvshuffle200200/train_lr1e-10/_iter_{snapshot_id}')
+		model = 'gcfvflow_modelflow_snapshots_gcfvshuffle200200_vgg_lr1e-14'
+		work_dir = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow'
+		deploy_file = os.path.join(work_dir, 'deploy_modeldefault.prototxt')
+		snapshot = os.path.join(work_dir, 'snapshots_gcfvshuffle200200/vgg_lr1e-14/_iter_{snapshot_id}.caffemodel')
+		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_gcfvshuffle200200/vgg_lr1e-14/_iter_{snapshot_id}')
 		
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
 		test_label_data = '/lustre/yixi/data/gcfv_dataset/external_validation/ground_truth/labels/{id}_gt.png'
-		train_flow_x = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.f1.flow_x.png'
-		train_flow_y = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.f1.flow_y.png'
-		test_flow_x = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.f1.flow_x.png'
-		test_flow_y = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.f1.flow_y.png'
+		train_flow_x = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.flow_x.png'
+		train_flow_y = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/flow/{id}.flow_y.png'
+		test_flow_x = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.flow_x.png'
+		test_flow_y = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/flow/{id}.flow_y.png'
 
-		iter = range(30000, 25000, -5000)
 		
 		BoxSize = None
-			
+		NumLabels = 8
+		BackGroundLabel = 0
+		useflow = True
+		mean_value = (121.364250092, 126.289872692, 124.244447077, 127.953835502, 127.581663093)
+	
+
+		iter = range(5000, 4000, -1000)
 		numclasses = 9
 		interested_class = range(0, numclasses)
-		
 		eval_metric = 'pixel_accuracy'
-		input_RGB_mean = {'Train':(83.3774396271, 87.3343435075, 86.27596998),
+		if not useflow:
+			input_RGB_mean = {'Train':(83.3774396271, 87.3343435075, 86.27596998),
 				'Test':(83.3774396271, 87.3343435075, 86.27596998)}
+		else:
+			input_RGB_mean = {'Train':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063),
+				'Test':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063)}
+		
+		
 		shortcut_inference = True
+		
+		inputs_Test = LoadImagePaths(test_data)
+		inputs_Test_Label = LoadLabelPaths(test_label_data)
+		flow_x_Test = None if not useflow else dict([(id, test_flow_x.format(id=id)) for id in inputs_Test.keys()])
+		flow_y_Test = None if not useflow else dict([(id, test_flow_y.format(id=id)) for id in inputs_Test.keys()])
+		inputs_Train = LoadImagePaths(train_data)
+		inputs_Train_Label = LoadLabelPaths(train_label_data)
+		flow_x_Train = None if not useflow else dict([(id, train_flow_x.format(id=id)) for id in inputs_Train.keys()])
+		flow_y_Train = None if not useflow else dict([(id, train_flow_y.format(id=id)) for id in inputs_Train.keys()])
+		
 
-
-
-
-	inputs_Test = LoadImagePaths(test_data)
-	inputs_Test_Label = LoadLabelPaths(test_label_data)
-	flow_x_Test = None if not useflow else dict([(id, test_flow_x.format(id=id)) for id in inputs_Test.keys()])
-	flow_y_Test = None if not useflow else dict([(id, test_flow_y.format(id=id)) for id in inputs_Test.keys()])
 	eval(inputs_Test, inputs_Test_Label, flow_x_Test, flow_y_Test, 'Test')
 	inputs_Test.clear()
 	inputs_Test_Label.clear()
 
-	inputs_Train = LoadImagePaths(train_data)
-	inputs_Train_Label = LoadLabelPaths(train_label_data)
-	flow_x_Train = None if not useflow else dict([(id, train_flow_x.format(id=id)) for id in inputs_Train.keys()])
-	flow_y_Train = None if not useflow else dict([(id, train_flow_y.format(id=id)) for id in inputs_Train.keys()])
 	#eval(inputs_Train, inputs_Train_Label, flow_x_Train, flow_y_Train, 'Train')
 	inputs_Train.clear()
 	inputs_Train_Label.clear()
