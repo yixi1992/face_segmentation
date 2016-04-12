@@ -35,14 +35,14 @@ class Resizer:
 		if im.ndim==2:
 			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval)
 		else:
-			pad_im = []
-			for ch in range(im.shape[2]):
-				pad_im = np.concatenate(pad_im, np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1]), (0,0)), mode='constant', constant_values = padval[ch]), axis=2)
+			arrays = [np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval[ch]) for ch in range(im.shape[2])]
+			pad_im = np.stack(arrays, axis=2)
+			print pad_im.shape
 		return pad_im
 
 class ImageResizer(Resizer):
-	def resize(self, im):
-		pad_im = self.padarray(im, self.padval)
+	def resize(self, im, padval):
+		pad_im = self.padarray(im, padval)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
 		return np.array(res_im)
@@ -99,9 +99,9 @@ def LoadImage(filename, flow_x=None, flow_y=None, resizer=None):
 		im = np.concatenate((im, flow_im), axis=2)
 	
 	if resizer!=None:
-		im_res = resizer.resize(im[:,:,:3])
+		im_res = resizer.resize(im[:,:,:3], mean_values)
 		for i in range(3, im.shape[2]):
-			flow_im_res = resizer.resize(im[:,:,i])
+			flow_im_res = resizer.resize(im[:,:,i], 128)
 			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
 			im_res = np.concatenate((im_res, flow_im_res), axis=2)
 		im = im_res
@@ -127,7 +127,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_value)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			print in_idx
@@ -199,7 +199,7 @@ if __name__=='__main__':
 		LabelSize = (200, 200)
 		nopadding = False
 		useflow = True
-		mean_value = (121.364250092, 126.289872692, 124.244447077, 127.953835502, 127.581663093)
+		mean_values = [121.364250092, 126.289872692, 124.244447077]
 
 		lmdb_dir = 'gcfvshuffle' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
