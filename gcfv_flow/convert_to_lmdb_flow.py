@@ -33,16 +33,19 @@ class Resizer:
 		box_size = (max(im.shape[0], im.shape[1]), max(im.shape[0], im.shape[1])) if box_size==None else box_size
 		
 		pad_size = (box_size[0]-im.shape[0], box_size[1]-im.shape[1])
-		if im.ndim==2: #flow
-			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = self.flow_pad_value)
+		if im.ndim==2: #flow or label
+			pad_im = np.pad(im, pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval)
 		else: #RGB
-			arrays = [np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = self.RGB_pad_value[ch]) for ch in range(im.shape[2])]
+			arrays = [np.pad(im[:,:,ch], pad_width = ((0, pad_size[0]), (0, pad_size[1])), mode='constant', constant_values = padval[ch]) for ch in range(im.shape[2])]
 			pad_im = np.stack(arrays, axis=2)
-			print pad_im.shape
 		return pad_im
 
 class ImageResizer(Resizer):
 	def resize(self, im, padval=None):
+		if im.ndim==2:
+			padval = self.flow_pad_value
+		else:
+			padval = self.RGB_pad_value
 		pad_im = self.padarray(im, padval)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
@@ -121,6 +124,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 			im = LoadLabel(in_, resizer)
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
+			print in_idx, 'label', im.shape
 	in_db.close()
 
 
@@ -137,6 +141,7 @@ def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
+			print in_idx, im.shape, RGB_sum/(in_idx+1)
 	in_db.close()
 	f = open(os.path.join(dir, 'RGB_mean'), 'w')
 	RGB_mean = RGB_sum/len(keys)
@@ -202,7 +207,7 @@ if __name__=='__main__':
 		useflow = False
 		mean_values = [121.364250092, 126.289872692, 124.244447077]
 
-		lmdb_dir = 'gcfvmeanpad' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		lmdb_dir = 'test_gcfvmeanpad' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
