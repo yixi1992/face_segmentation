@@ -10,15 +10,14 @@ for WORK_DIR = WORK_DIRS,
 WORK_DIR
 
 
-FRAME_DIR = fullfile(WORK_DIR, 'frames/%s.jpg');
-FLOW_SAVE_DIR = fullfile(WORK_DIR, 'flo/%s.flo');
+FRAME_DIR = [WORK_DIR{:}, '/frames/%s.jpg'];
 
 
 % Should name as *.fk.flow_x.png or *.bk_flow_x.png
 deltas = [-1, 2, -2, 4, -4];
 for d_idx = 1:length(deltas),
 delta = deltas(d_idx);
-vv=''
+vv='';
 if delta>0, 
 	vv='f'; 
 else, 
@@ -26,8 +25,9 @@ else,
 end
 vv=[vv, num2str(abs(delta))]
 
-FLOW_X_SAVE_DIR = fullfile(WORK_DIR, ['flow/%s.', vv, '.flow_x.png'])
-FLOW_Y_SAVE_DIR = fullfile(WORK_DIR, ['flow/%s.', vv, '.flow_y.png'])
+FLOW_SAVE_DIR = [WORK_DIR{:}, '/flo/%s.', vv, '.flo']
+FLOW_X_SAVE_DIR = [WORK_DIR{:}, '/flow/%s.', vv, '.flow_x.png']
+FLOW_Y_SAVE_DIR = [WORK_DIR{:}, '/flow/%s.', vv, '.flow_y.png']
 
 
 
