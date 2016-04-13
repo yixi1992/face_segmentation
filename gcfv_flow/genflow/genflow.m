@@ -4,15 +4,39 @@ function genflow(proc_rank, proc_size),
 addpath(genpath('epicflow'))
 addpath(genpath('utils'));
 
-WORK_DIR = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos'
+WORK_DIRS = {'/lustre/yixi/data/gcfv_dataset/cross_validation/videos', '/lustre/yixi/data/gcfv_dataset/external_validation/videos'}
+
+for WORK_DIR = WORK_DIRS,
+WORK_DIR
+
+
 FRAME_DIR = fullfile(WORK_DIR, 'frames/%s.jpg');
 FLOW_SAVE_DIR = fullfile(WORK_DIR, 'flo/%s.flo');
+
+
 % Should name as *.fk.flow_x.png or *.bk_flow_x.png
-FLOW_X_SAVE_DIR = fullfile(WORK_DIR, 'flow/%s.flow_x.png');
-FLOW_Y_SAVE_DIR = fullfile(WORK_DIR, 'flow/%s.flow_y.png');
+deltas = [-1, 2, -2, 4, -4];
+for d_idx = 1:length(deltas),
+delta = deltas(d_idx);
+vv=''
+if delta>0, 
+	vv='f'; 
+else, 
+	vv='b'; 
+end
+vv=[vv, num2str(abs(delta))]
+
+FLOW_X_SAVE_DIR = fullfile(WORK_DIR, ['flow/%s.', vv, '.flow_x.png'])
+FLOW_Y_SAVE_DIR = fullfile(WORK_DIR, ['flow/%s.', vv, '.flow_y.png'])
+
+
+
 
 files = dir(sprintf(FRAME_DIR, '*'));
 files = files(~[files.isdir]);
+
+orimm=[]
+mm=[]
 
 
 for i=1:length(files),
@@ -23,12 +47,12 @@ for i=1:length(files),
 			parts = strread(name1,'%s','delimiter','_');
 			vid = str2num(parts{1});
 			fid = str2num(parts{2});
-			name2 = [num2str(vid), '_', num2str(fid+1)];
+			name2 = [num2str(vid), '_', num2str(fid+delta)];
 			
 			backward = 0;
 			if exist(sprintf(FRAME_DIR, name2), 'file')~=2,
-				if exist(sprintf(FRAME_DIR, [num2str(vid), '_', num2str(fid-1)]))==2,
-					name2 = [num2str(vid), '_', num2str(fid-1)];
+				if exist(sprintf(FRAME_DIR, [num2str(vid), '_', num2str(fid-delta)]))==2,
+					name2 = [num2str(vid), '_', num2str(fid-delta)];
 					backward = 1;
 				else
 					print 'cant find', name1
@@ -48,14 +72,22 @@ for i=1:length(files),
 		end
 
 		flow_img = readFlowFile(FLOW_SAVE_PATH);
-		flow_img(flow_img<-20) = 20;
-		flow_img(flow_img>20) = 20;
-		flow_img = uint8(round((flow_img+20)/40*255));
+		orimm = [orimm, mean(mean(flow_img(:,:,1)))];
+		flow_img(flow_img<-35) = 35;
+		flow_img(flow_img>35) = 35;
+		flow_img = uint8(round((flow_img+35)/(2*35)*255));
 		imwrite(flow_img(:,:,1), sprintf(FLOW_X_SAVE_DIR, name1));
 		imwrite(flow_img(:,:,2), sprintf(FLOW_Y_SAVE_DIR, name1));
-		sprintf(FLOW_Y_SAVE_DIR, name1)		
+		sprintf(FLOW_Y_SAVE_DIR, name1)	
+		mm = [mm, mean(mean(flow_img(:,:,1)))];
+		
 	end
 end
 
-end
+mean(orimm)
+mean(mm)
 
+
+end % delta
+end % WORK_DIR
+end % function end
