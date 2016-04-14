@@ -10,6 +10,7 @@ import lmdb
 import caffe.proto.caffe_pb2
 from caffe.io import datum_to_array
 from convert_to_lmdb_flow import LoadImage, LoadLabel, ImageResizer, LabelResizer
+import sys
 
 # Load LMDB data to a dictionary
 def LMDB2Dict(lmdb_directory):
@@ -67,7 +68,7 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	acc = []
 	class_acc = np.zeros(numclasses*2)
 	confcounts = np.zeros((numclasses, numclasses))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, RGB_pad_values, flow_pad_value) if mean_pad else ImageResizer(RSize, BoxSize, nopadding, [0,0,0], 0)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, RGB_pad_values, flow_pad_value) 
 	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize, nopadding)
 
 	# load net
@@ -78,7 +79,7 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	
 	for key in image_dict.keys():
 		print key
-		if random.randint(0,7000)>=10:
+		if random.randint(0,7000)>=30:
 			continue
 		img_path = image_dict[key]
 		label_path = label_dict[key]
@@ -253,9 +254,10 @@ if __name__=='__main__':
 		NumLabels = 8
 		BackGroundLabel = 0
 		useflow = True
-		RGB_pad_values = [121.364250092, 126.289872692, 124.244447077] #128 for any flows
-		flow_pad_value = 128
 		mean_pad = False
+		RGB_pad_values = [121.364250092, 126.289872692, 124.244447077] if mean_pad else [0,0,0] #128 for any flows
+		flow_pad_value = 128 if mean_pad else 0
+		
 
 		iter = range(15000, 14000, -1000)
 		numclasses = 9
@@ -268,7 +270,9 @@ if __name__=='__main__':
 			else:
 				input_RGB_mean = {'Train':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063),
 					'Test':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063)}
-		
+		else:
+			print "TODO"
+			sys.exit(1)
 		
 		shortcut_inference = True
 		

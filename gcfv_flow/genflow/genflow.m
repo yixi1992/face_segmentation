@@ -73,9 +73,10 @@ for i=1:length(files),
 
 		flow_img = readFlowFile(FLOW_SAVE_PATH);
 		orimm = [orimm, mean(mean(flow_img(:,:,1)))];
-		flow_img(flow_img<-35) = 35;
-		flow_img(flow_img>35) = 35;
-		flow_img = uint8(round((flow_img+35)/(2*35)*255));
+		cut_k = 35;
+		flow_img(flow_img<-cut_k) = -cut_k;
+		flow_img(flow_img>cut_k) = cut_k;
+		flow_img = uint8(round((flow_img+cut_k)/(2*cut_k)*255));
 		imwrite(flow_img(:,:,1), sprintf(FLOW_X_SAVE_DIR, name1));
 		imwrite(flow_img(:,:,2), sprintf(FLOW_Y_SAVE_DIR, name1));
 		sprintf(FLOW_Y_SAVE_DIR, name1)	
