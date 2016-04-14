@@ -12,7 +12,8 @@ momentum: 0.99
 # no gradient accumulation
 iter_size: 1
 max_iter: 80000
-weight_decay: 0.0010 
+weight_decay: 0.0005 
 snapshot: 1000
-snapshot_prefix: "snapshots_gcfvmeanpad200200/vgg_lr1e-10/"
+snapshot_prefix: "snapshots_gcfvmeanpad200200/vgg_adagrad_lr1e-10/"
 test_initialization: true
+type: "AdaGrad"
