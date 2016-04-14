@@ -38,5 +38,5 @@ for pr, pr_conv in zip(params, params_full_conv):
 
 
 
-net_full_conv.save('vgg_modeldefault_surg.caffemodel')
+net_full_conv.save('vgg_modeldefault_convflow_xavier_surg.caffemodel')
 

@@ -24,6 +24,12 @@ layer {
     pad: 100
     kernel_size: 3
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer {
