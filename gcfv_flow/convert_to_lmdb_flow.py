@@ -42,10 +42,11 @@ class Resizer:
 
 class ImageResizer(Resizer):
 	def resize(self, im, padval=None):
-		if im.ndim==2:
-			padval = self.flow_pad_value
-		else:
-			padval = self.RGB_pad_value
+		if padval==None:
+			if im.ndim==2:
+				padval = self.flow_pad_value
+			else:
+				padval = self.RGB_pad_value
 		pad_im = self.padarray(im, padval)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.ANTIALIAS)
@@ -207,7 +208,7 @@ if __name__=='__main__':
 		useflow = False
 		mean_values = [121.364250092, 126.289872692, 124.244447077]
 
-		lmdb_dir = 'test_gcfvmeanpad' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		lmdb_dir = 'gcfvmeanpad' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
