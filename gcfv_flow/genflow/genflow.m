@@ -73,7 +73,7 @@ for i=1:length(files),
 
 		flow_img = readFlowFile(FLOW_SAVE_PATH);
 		orimm = [orimm, mean(mean(flow_img(:,:,1)))];
-		cut_k = 35;
+		cut_k = 20;
 		flow_img(flow_img<-cut_k) = -cut_k;
 		flow_img(flow_img>cut_k) = cut_k;
 		flow_img = uint8(round((flow_img+cut_k)/(2*cut_k)*255));
