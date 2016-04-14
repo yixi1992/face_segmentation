@@ -67,7 +67,7 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	acc = []
 	class_acc = np.zeros(numclasses*2)
 	confcounts = np.zeros((numclasses, numclasses))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_values, flow_pad_value=128)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, RGB_pad_values, flow_pad_value) if mean_pad else ImageResizer(RSize, BoxSize, nopadding, [0,0,0], 0)
 	labelresizer = None if not resize else LabelResizer(LabelSize, BoxSize, nopadding)
 
 	# load net
@@ -78,8 +78,8 @@ def test_accuracy(model_file, image_dict, label_dict, flow_x_dict, flow_y_dict, 
 	
 	for key in image_dict.keys():
 		print key
-		#if random.randint(0,7000)>=5:
-		#	continue
+		if random.randint(0,7000)>=10:
+			continue
 		img_path = image_dict[key]
 		label_path = label_dict[key]
 		flow_x_path = flow_x_dict[key] if flow_x_dict!=None and (key in flow_x_dict.keys()) else None
@@ -233,11 +233,11 @@ if __name__=='__main__':
 
 
 	if True:
-		model = 'gcfvflow_modelflow_snapshots_gcfvshuffle200200_vgg_lr1e-14'
+		model = 'gcfvflow_modelflow_snapshots_gcfvshuffle200200_vgg_lr1e-14_5000'
 		work_dir = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow'
 		deploy_file = os.path.join(work_dir, 'deploy_modeldefault.prototxt')
-		snapshot = os.path.join(work_dir, 'snapshots_gcfvshuffle200200/vgg_lr1e-14/_iter_{snapshot_id}.caffemodel')
-		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_gcfvshuffle200200/vgg_lr1e-14/_iter_{snapshot_id}')
+		snapshot = os.path.join(work_dir, 'snapshots_gcfvshuffle200200/vgg_lr1e-14_5000/_iter_{snapshot_id}.caffemodel')
+		pred_visual_dir_template = os.path.join(work_dir, 'pred_visual_gcfvshuffle200200/vgg_lr1e-14_5000/_iter_{snapshot_id}')
 		
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
@@ -253,19 +253,21 @@ if __name__=='__main__':
 		NumLabels = 8
 		BackGroundLabel = 0
 		useflow = True
-		mean_values = [121.364250092, 126.289872692, 124.244447077] #128 for any flows
-	
+		RGB_pad_values = [121.364250092, 126.289872692, 124.244447077] #128 for any flows
+		flow_pad_value = 128
+		mean_pad = False
 
-		iter = range(5000, 4000, -1000)
+		iter = range(15000, 14000, -1000)
 		numclasses = 9
 		interested_class = range(0, numclasses)
 		eval_metric = 'pixel_accuracy'
-		if not useflow:
-			input_RGB_mean = {'Train':(83.3774396271, 87.3343435075, 86.27596998),
-				'Test':(83.3774396271, 87.3343435075, 86.27596998)}
-		else:
-			input_RGB_mean = {'Train':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063),
-				'Test':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063)}
+		if not mean_pad:
+			if not useflow:
+				input_RGB_mean = {'Train':(83.3774396271, 87.3343435075, 86.27596998),
+					'Test':(83.3774396271, 87.3343435075, 86.27596998)}
+			else:
+				input_RGB_mean = {'Train':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063),
+					'Test':(82.8091877059, 86.739123641, 85.6879633692, 87.8961855355, 87.5600053063)}
 		
 		
 		shortcut_inference = True
