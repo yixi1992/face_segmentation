@@ -62,8 +62,8 @@ for frame_dir = frame_dirs,
 					end
 
 					fprintf('name1=%s name2=%s\n', name1, name2);
-					IMAGE1_PATH = sprintf(FRAME_DIR, name1);
-					IMAGE2_PATH = sprintf(FRAME_DIR, name2);
+					IMAGE1_PATH = sprintf(file_path, name1);
+					IMAGE2_PATH = sprintf(file_path, name2);
 					
 					fprintf('Generating epicflow for %s %s  and save to %s\n', IMAGE1_PATH, IMAGE2_PATH, FLOW_SAVE_PATH);
 					f = get_epicflow(IMAGE1_PATH, IMAGE2_PATH, FLOW_SAVE_PATH);
