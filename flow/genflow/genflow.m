@@ -38,8 +38,8 @@ for frame_dir = frame_dirs,
 		mm=[];
 			
 		FLOW_SAVE_DIR = [SAVE_DIR, '/flo/%s.', vv, '.flo'];
-		FLOW_X_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_x.png']
-		FLOW_Y_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_y.png']
+		FLOW_X_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_x.png'];
+		FLOW_Y_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_y.png'];
 
 		for i = 1:length(files),
 			if mod(i, proc_size) == proc_rank,
@@ -48,7 +48,7 @@ for frame_dir = frame_dirs,
 				[~, name, ~] = fileparts(name);
 				[pathstr, name1, ext1] = fileparts(sprintf(file_path, name));
 				FLOW_SAVE_PATH = sprintf(FLOW_SAVE_DIR, name1);
-				sprintf('flow_save_path=%s\n', FLOW_SAVE_PATH);
+				fprintf('flow_save_path=%s\n', FLOW_SAVE_PATH);
 				
 				if exist(FLOW_SAVE_PATH)~=2,
 					if ((i+delta>=1) & (i+delta<=length(files))),
@@ -66,8 +66,15 @@ for frame_dir = frame_dirs,
 					IMAGE2_PATH = sprintf(file_path, name2);
 					
 					fprintf('Generating epicflow for %s %s  and save to %s\n', IMAGE1_PATH, IMAGE2_PATH, FLOW_SAVE_PATH);
-					f = get_epicflow(IMAGE1_PATH, IMAGE2_PATH, FLOW_SAVE_PATH);
+					try
+						imread(IMAGE1_PATH);
+						imread(IMAGE2_PATH);
+					catch
+						fprintf('error occured reading images %s %s\n', IMAGE1_PATH, IMAGE2_PATH);
+						continue;
+					end
 					
+					f = get_epicflow(IMAGE1_PATH, IMAGE2_PATH, FLOW_SAVE_PATH);
 					if backward==1,
 						flow_img = readFlowFile(f);
 						writeFlowFile(flow_img*(-1), f);
@@ -82,14 +89,13 @@ for frame_dir = frame_dirs,
 				flow_img = uint8(round((flow_img+cut_k)/(2*cut_k)*255));
 				imwrite(flow_img(:,:,1), sprintf(FLOW_X_SAVE_DIR, name1));
 				imwrite(flow_img(:,:,2), sprintf(FLOW_Y_SAVE_DIR, name1));
-				sprintf(FLOW_Y_SAVE_DIR, name1)	
 				mm = [mm, mean(mean(flow_img(:,:,1)))];
 				
 			end
 		end
 
-		fprintf('mean val = where delta=%d %f\n', delta, mean(orimm));
-		fprintf('mean val =%f\n', mean(mm));
+		fprintf('mean_val = %f where delta=%d\n', mean(orimm), delta);
+		fprintf('mean_val =%f\n', mean(mm));
 
 
 	end % delta
@@ -101,7 +107,7 @@ end % FRAME_DIR
 		else, 
 			vv='b'; 
 		end
-		vv=[vv, num2str(abs(delta))]
+		vv=[vv, num2str(abs(delta))];
 	end
 
 end % function end
