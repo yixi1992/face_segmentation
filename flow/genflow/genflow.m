@@ -5,21 +5,23 @@ addpath(genpath('/lustre/yixi/face_segmentation_finetune/gcfv_flow/genflow/epicf
 addpath(genpath('utils'));
 
 frame_dir_path = '/lustre/yueheing/datasets/camvid/raw_frames/';
-frame_dirs = {dir(frame_dir_path).name};
+frame_dirs = dir(frame_dir_path);
+frame_dirs = {frame_dirs.name};
 
 interested_file_dir = '/lustre/yixi/data/CamVid/701_StillsRaw_full/';
 interested_files = dir(interested_file_dir);
-interested_files = {dir(~[interested_files.isdir]).name};
+interested_files = {interested_files(~[interested_files.isdir]).name};
 
 
-SAVE_DIR = '/lustre/yixi/data/CamVid/flow_all/';
+SAVE_DIR = '/lustre/yixi/data/CamVid/flow_all';
 
 
 for frame_dir = frame_dirs,
-	frame_dir
-	if frame_dir{:}=='.' || frame_dir{:}=='..', continue; end
+	if (strcmp(frame_dir{:},'.')==1) | (strcmp(frame_dir{:},'..')==1), continue; end
 
+	fprintf('Working on video/folder %s\n', frame_dir{:});
 	file_path = [frame_dir_path, frame_dir{:},'/%s.png']
+	fprintf('file_path=%s\n', file_path);
 	files = dir(sprintf(file_path, '*'));
 	files = {files(~[files.isdir]).name};
 	files = sort(files);
@@ -35,27 +37,31 @@ for frame_dir = frame_dirs,
 		orimm=[];
 		mm=[];
 			
-		FLOW_SAVE_DIR = [SAVE_DIR, '/flo/%s', vv, '.flo'];
-		FLOW_X_SAVE_DIR = [SAVE_DIR, '/flow/%s', vv, '.flow_x.png']
-		FLOW_Y_SAVE_DIR = [SAVE_DIRS, '/flow/%s', vv, '.flow_y.png']
+		FLOW_SAVE_DIR = [SAVE_DIR, '/flo/%s.', vv, '.flo'];
+		FLOW_X_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_x.png']
+		FLOW_Y_SAVE_DIR = [SAVE_DIR, '/flow/%s.', vv, '.flow_y.png']
 
 		for i = 1:length(files),
 			if mod(i, proc_size) == proc_rank,
-				name = files(i){:};
-				if ~ismember({name}, interested_files), continue; end
-
+				name = files{i};
+				if ~ismember(name, interested_files), continue; end
+				[~, name, ~] = fileparts(name);
 				[pathstr, name1, ext1] = fileparts(sprintf(file_path, name));
 				FLOW_SAVE_PATH = sprintf(FLOW_SAVE_DIR, name1);
+				sprintf('flow_save_path=%s\n', FLOW_SAVE_PATH);
+				
 				if exist(FLOW_SAVE_PATH)~=2,
-					parts = strread(name1,'%s','delimiter','_');
-					if i+delta>=1 && i+delta<=length(files),
-						name2 = files(i+delta){:};	
+					if ((i+delta>=1) & (i+delta<=length(files))),
+						name2 = files{i+delta};
+						[~, name2, ~] = fileparts(name2);
 						backward = 0;
 					else,
-						name2 = files(i-delta){:};
+						name2 = files{i-delta};
+						[~, name2, ~] = fileparts(name2);
 						backward = 1;
 					end
 
+					fprintf('name1=%s name2=%s\n', name1, name2);
 					IMAGE1_PATH = sprintf(FRAME_DIR, name1);
 					IMAGE2_PATH = sprintf(FRAME_DIR, name2);
 					
