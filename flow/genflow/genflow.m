@@ -20,7 +20,7 @@ for frame_dir = frame_dirs,
 	if (strcmp(frame_dir{:},'.')==1) | (strcmp(frame_dir{:},'..')==1), continue; end
 
 	fprintf('Working on video/folder %s\n', frame_dir{:});
-	file_path = [frame_dir_path, frame_dir{:},'/%s.png']
+	file_path = [frame_dir_path, frame_dir{:},'/%s.png'];
 	fprintf('file_path=%s\n', file_path);
 	files = dir(sprintf(file_path, '*'));
 	files = {files(~[files.isdir]).name};
