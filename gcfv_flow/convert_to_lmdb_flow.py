@@ -182,7 +182,7 @@ if __name__=='__main__':
 		RGB_pad_values = [0,0,0]
 		flow_pad_value = 128 if flow_mean_pad else 0
 		
-		lmdb_dir = 'camvid' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		lmdb_dir = 'camvid' + ('rgbmp' if RGB_mean_pad else '') + ('fmp' if flow_mean_pad else '') + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 		train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 		flow_x = '/lustre/yixi/data/CamVid/flow/{id}.flow_x.png'
