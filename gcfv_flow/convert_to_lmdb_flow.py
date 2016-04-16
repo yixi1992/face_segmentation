@@ -106,7 +106,7 @@ def LoadImage(filename, flow_x=None, flow_y=None, resizer=None):
 	if resizer!=None:
 		im_res = resizer.resize(im[:,:,:3])
 		for i in range(3, im.shape[2]):
-			flow_im_res = resizer.resize(im[:,:,i], 128)
+			flow_im_res = resizer.resize(im[:,:,i])
 			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
 			im_res = np.concatenate((im_res, flow_im_res), axis=2)
 		im = im_res
@@ -133,7 +133,7 @@ def createLMDBLabel(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize
 def createLMDBImage(dir, mapsize, inputs_Train, flow_x=None, flow_y=None, resize=False, keys=None):
 	in_db = lmdb.open(dir, map_size=mapsize)
 	RGB_sum = np.zeros(3 + (flow_x!=None) + (flow_y!=None))
-	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, mean_values)
+	resizer = None if not resize else ImageResizer(RSize, BoxSize, nopadding, RGB_pad_values, flow_pad_value)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			print in_idx
@@ -171,10 +171,14 @@ if __name__=='__main__':
 	if False:
 		resize = True
 		NumberTest = 50 # Number of Testing Images
-		RSize = (200, 200)
-		LabelSize = (200, 200)
+		RSize = (500, 500)
+		LabelSize = (500, 500)
 		nopadding = False
-		useflow = True
+		useflow = False
+		mean_pad = False
+
+		RGB_pad_values = [0,0,0]
+		flow_pad_value = 0
 		
 		lmdb_dir = 'camvid' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
@@ -202,13 +206,16 @@ if __name__=='__main__':
 
 	if True:
 		resize = True
-		RSize = (200, 200)
-		LabelSize = (200, 200)
+		RSize = (500, 500)
+		LabelSize = (500, 500)
 		nopadding = False
 		useflow = False
-		mean_values = [121.364250092, 126.289872692, 124.244447077]
+		mean_pad = False
 
-		lmdb_dir = 'gcfvmeanpad' + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		RGB_pad_values = [121.364250092, 126.289872692, 124.244447077] if mean_pad else [0,0,0]
+		flow_pad_value = 128 if mean_pad else 0
+
+		lmdb_dir = 'gcfv' + ('mean_pad' if mean_pad else '') + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
