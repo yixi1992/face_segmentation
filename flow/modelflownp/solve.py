@@ -45,13 +45,25 @@ def interp_surgery(net, layers):
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12/_iter_58000.caffemodel'
 
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12_58000/_iter_58000.caffemodel'
-base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12_58000_58000/_iter_77000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/train_lr1e-10_19000_4000_1e-12_58000_58000/_iter_77000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modeldefault/snapshots_camvid200200/train_lr1e-10/_iter_77000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10/_iter_19000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10_19000/_iter_38000.caffemodel'
+
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10_19000_38000/_iter_38000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10_19000_38000_38000_1e-11/_iter_38000.caffemodel'
+
+base_weights = 'modeldefaultflow.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefaultflowsurg_lr1e-10/_iter_22000.caffemodel'
 
 # init
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
-solver = caffe.SGDSolver('solver.prototxt')
+solver = caffe.SGDSolver('solver_fmpepic.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
 #interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
