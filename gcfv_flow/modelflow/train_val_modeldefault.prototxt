@@ -7,14 +7,14 @@ layer {
     phase: TRAIN
   }
   transform_param {
-	mean_value: 82.8091877059
-	mean_value: 86.739123641
-	mean_value: 85.6879633692
-	mean_value: 87.8961855355
-	mean_value: 87.5600053063
+	mean_value: 120
+	mean_value: 126
+	mean_value: 124
+	mean_value: 128
+	mean_value: 128
   }
   data_param {
-    source: "../gcfvshuffle200200flow_lmdb/train-lmdb"
+    source: "../gcfvmeanpad200200flow_lmdb/train-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -27,7 +27,7 @@ layer {
     phase: TRAIN
   }
   data_param {
-    source: "../gcfvshuffle200200flow_lmdb/train-label-lmdb"
+    source: "../gcfvmeanpad200200flow_lmdb/train-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -40,14 +40,14 @@ layer {
     phase: TEST
   }
   transform_param {
-   	mean_value: 82.8091877059
-	mean_value: 86.739123641
-	mean_value: 85.6879633692
-	mean_value: 87.8961855355
-	mean_value: 87.5600053063
+   	mean_value: 120
+	mean_value: 126
+	mean_value: 124
+	mean_value: 128
+	mean_value: 128
   }
   data_param {
-    source: "../gcfvshuffle200200flow_lmdb/test-lmdb"
+    source: "../gcfvmeanpad200200flow_lmdb/test-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -60,7 +60,7 @@ layer {
     phase: TEST
   }
   data_param {
-    source: "../gcfvshuffle200200flow_lmdb/test-label-lmdb"
+    source: "../gcfvmeanpad200200flow_lmdb/test-label-lmdb"
     batch_size: 1
     backend: LMDB
   }

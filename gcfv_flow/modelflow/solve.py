@@ -36,32 +36,34 @@ def interp_surgery(net, layers):
 #Camvid finetuned gcfv RGB
 #base_weights = 'modeldefaultflow.caffemodel'
 
-#vgg
+#vggRGB finetuned
 base_weights = 'vgg_modeldefault_surg.caffemodel' 
+#base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200/vgg_lr1e-14/_iter_5000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_lr1e-14/_iter_15000.caffemodel'
+
+#base_weights = 'vgg_modeldefault_convflow_xavier_surg.caffemodel' #xavier initialize conv1_1_flow
+#base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12/_iter_6000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12_6000_1e-11/_iter_8000.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12_6000_1e-11_8000_1e-10/_iter_9000.caffemodel'
+
 
 # init
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
 solver = caffe.SGDSolver('solver.prototxt')
-
-# do net surgery to set the deconvolution weights for bilinear interpolation
-#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-#interp_surgery(solver.net, interp_layers)
-print '----- yixi initialized params ----'
-layernames = solver.net.params.keys()
-for l in layernames:
-	print 'yixi', l, np.mean(solver.net.params[l][0].data), np.max(solver.net.params[l][0].data), np.mean(solver.net.params[l][0].data)
-
-
-
-# copy base weights for fine-tuning
 solver.net.copy_from(base_weights)
 
-print '----- yixi initialized params ----'
-layernames = solver.net.params.keys()
-for l in layernames:
-	print 'yixi', l, np.mean(solver.net.params[l][0].data), np.max(solver.net.params[l][0].data), np.mean(solver.net.params[l][0].data)
+
+# do net surgery to set the deconvolution weights for bilinear interpolation
+interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+interp_surgery(solver.net, interp_layers)
+
+
+#print '----- yixi initialized params ----'
+#layernames = solver.net.params.keys()
+#for l in layernames:
+#	print 'yixi', l, np.mean(solver.net.params[l][0].data), np.max(solver.net.params[l][0].data), np.mean(solver.net.params[l][0].data)
 
 
 
