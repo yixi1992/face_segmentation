@@ -177,6 +177,7 @@ if __name__=='__main__':
 		useflow = False
 		RGB_mean_pad = False
 		flow_mean_pad = True
+		# Default is RGB_mean_pad = False and flow_mean_pad = True
 
 		RGB_pad_values = [0,0,0]
 		flow_pad_value = 128 if flow_mean_pad else 0
@@ -213,11 +214,12 @@ if __name__=='__main__':
 		useflow = True
 		RGB_mean_pad = False
 		flow_mean_pad = True
-	
+		# Default is RGB_mean_pad = False and flow_mean_pad = True
+		
 		RGB_pad_values = [121.364250092, 126.289872692, 124.244447077] if RGB_mean_pad else [0,0,0]
 		flow_pad_value = 128 if flow_mean_pad else 0
 
-		lmdb_dir = 'gcfv' + ('rgbmeanpad' if RGB_mean_pad else '') + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
+		lmdb_dir = 'gcfv' + ('rgbmp' if RGB_mean_pad else '') + ('fmp' if flow_mean_pad else '') + str(RSize[0]) + str(RSize[1]) + ('flow' if useflow else '') + ('np' if nopadding else '') + '_lmdb'
 		train_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/videos/frames/{id}.jpg'
 		train_label_data = '/lustre/yixi/data/gcfv_dataset/cross_validation/ground_truth/labels/{id}_gt.png'
 		test_data = '/lustre/yixi/data/gcfv_dataset/external_validation/videos/frames/{id}.jpg'
