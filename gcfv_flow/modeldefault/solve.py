@@ -32,7 +32,8 @@ def interp_surgery(net, layers):
 # a fully convolutional VGG16 net.
 # http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
 # from VGG16
-base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
+base_weights = './VGG16fc200200.caffemodel'
+#base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfv200200/vgg_lr1e-10/_iter_5000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modeldefault/snapshots_gcfvshuffle200200/vgg_lr1e-10/_iter_45000.caffemodel'
 
@@ -49,10 +50,11 @@ caffe.set_device(0)
 
 solver = caffe.SGDSolver('solver.prototxt')
 
+solver.net.copy_from(base_weights)
+
 # do net surgery to set the deconvolution weights for bilinear interpolation
 interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
 interp_surgery(solver.net, interp_layers)
-print interp_layers
 print '----- yixi initialized params ----'
 layernames = solver.net.params.keys()
 for l in layernames:
@@ -61,7 +63,6 @@ for l in layernames:
 
 
 # copy base weights for fine-tuning
-solver.net.copy_from(base_weights)
 
 print '----- yixi initialized params ----'
 layernames = solver.net.params.keys()
