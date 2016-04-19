@@ -83,12 +83,6 @@ layer {
     pad: 100
     kernel_size: 3
     engine: CAFFE
-    weight_filler {
-    	type: "xavier"
-    }
-    bias_filler {
-    	type: "constant"
-    }
   }
 }
 layer {
@@ -563,7 +557,7 @@ layer {
   bottom: "score59"
   top: "upscore2"
   param {
-    lr_mult: 0
+    lr_mult: 1
     decay_mult: 1
   }
   convolution_param {
@@ -610,7 +604,7 @@ layer {
   bottom: "score-fused"
   top: "score4"
   param {
-    lr_mult: 0
+    lr_mult: 1
     decay_mult: 1
   }
   convolution_param {
@@ -657,7 +651,7 @@ layer {
   bottom: "score-final"
   top: "bigscore"
   param {
-    lr_mult: 0
+    lr_mult: 1
   }
   convolution_param {
     num_output: 9

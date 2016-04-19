@@ -37,7 +37,7 @@ def interp_surgery(net, layers):
 #base_weights = 'modeldefaultflow.caffemodel'
 
 #vggRGB finetuned
-base_weights = 'vgg_modeldefault_surg.caffemodel' 
+#base_weights = 'vgg_modeldefault_surg.caffemodel' 
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200/vgg_lr1e-14/_iter_5000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_lr1e-14/_iter_15000.caffemodel'
 
@@ -45,6 +45,9 @@ base_weights = 'vgg_modeldefault_surg.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12/_iter_6000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12_6000_1e-11/_iter_8000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/gcfv_flow/modelflow/snapshots_gcfvshuffle200200flow/vgg_convflow_xavier_lr1e-12_6000_1e-11_8000_1e-10/_iter_9000.caffemodel'
+
+#Camvidflow finetune
+base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvidfmp200200epicflow/modeldefaultflowsurg_lr1e-10/_iter_38000.caffemodel'
 
 
 # init
@@ -56,8 +59,8 @@ solver.net.copy_from(base_weights)
 
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
-interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-interp_surgery(solver.net, interp_layers)
+#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+#interp_surgery(solver.net, interp_layers)
 
 
 #print '----- yixi initialized params ----'
