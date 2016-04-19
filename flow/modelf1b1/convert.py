@@ -14,8 +14,8 @@ if __name__=='__main__':
 	if True:
 		print 'convert to lmdb begins....\n'
 		resize = True
-		RSize = (500, 500)
-		LabelSize = (500, 500)
+		RSize = (200, 200)
+		LabelSize = (200, 200)
 		nopadding = False
 		use_flow = ['f1','b1']
 		flow_dirs = ['flow_x', 'flow_y']
@@ -34,7 +34,7 @@ if __name__=='__main__':
 		args.RSize = RSize
 		args.LabelSize = LabelSize
 		args.nopadding = nopadding
-		args.use_flow = useflow
+		args.use_flow = use_flow
 		args.RGB_mean_pad = RGB_mean_pad
 		args.flow_mean_pad =flow_mean_pad
 		args.RGB_pad_values = RGB_pad_values
@@ -74,7 +74,7 @@ if __name__=='__main__':
 
 		############################# Creating LMDB for Training Data ##############################
 		print("Creating Training Data LMDB File ..... ")
-		createLMDBImage(os.path.join(lmdb_dir,'train-lmdb'), int(1e13), inputs_Train, flow=flow_Train,  keys=Train_keys, args=args)
+		createLMDBImage(os.path.join(lmdb_dir,'train-lmdb'), int(1e13), inputs_Train, flows=flow_Train,  keys=Train_keys, args=args)
 
 		 
 		############################# Creating LMDB for Training Labels ##############################
@@ -84,7 +84,7 @@ if __name__=='__main__':
 		
 		############################# Creating LMDB for Testing Data ##############################
 		print("Creating Testing Data LMDB File ..... ")
-		createLMDBImage(os.path.join(lmdb_dir,'test-lmdb'), int(1e13), inputs_Test, flow=flow_Test, keys=Test_keys, args=args)
+		createLMDBImage(os.path.join(lmdb_dir,'test-lmdb'), int(1e13), inputs_Test, flows=flow_Test, keys=Test_keys, args=args)
 
 
 		############################# Creating LMDB for Testing Labels ##############################
