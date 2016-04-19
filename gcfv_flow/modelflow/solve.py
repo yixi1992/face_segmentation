@@ -48,7 +48,8 @@ def interp_surgery(net, layers):
 
 #Camvidflow finetune
 #from /lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvidfmp200200epicflow/modeldefaultflowsurg_lr1e-10/_iter_38000.caffemodel
-base_weights = 'camvidflow_surg.caffemodel'
+#base_weights = 'camvidflow_surg.caffemodel'
+base_weights = 'snapshots_gcfvfmp200200flow/camvidflow_lr1e-10/_iter_24000.caffemodel'
 
 
 # init
