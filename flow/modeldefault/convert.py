@@ -27,7 +27,7 @@ if __name__=='__main__':
 		flow_pad_value = 128 if flow_mean_pad else 0
 
 
-		lmdb_dir = 'camvid' + ('rgbmp' if RGB_mean_pad else '') + ('fmp' if flow_mean_pad else '') + str(RSize[0]) + str(RSize[1]) + (''.join(use_flow)) + ('np' if nopadding else '') + '_lmdb'
+		lmdb_dir = 'camvidtrainval' + ('rgbmp' if RGB_mean_pad else '') + ('fmp' if flow_mean_pad else '') + str(RSize[0]) + str(RSize[1]) + (''.join(use_flow)) + ('np' if nopadding else '') + '_lmdb'
 			
 		args = CArgs()
 		args.resize = resize
@@ -75,6 +75,19 @@ if __name__=='__main__':
 		flow_Val = [dict([(id, flow_data.format(id=id, flow_type=flow_type, flow_dir=flow_dir)) for id in Val_keys]) for flow_dir in flow_dirs for flow_type in use_flow] 
 		flow_Test = [dict([(id, flow_data.format(id=id, flow_type=flow_type, flow_dir=flow_dir)) for id in Test_keys]) for flow_dir in flow_dirs for flow_type in use_flow] 
 
+
+		inputs_TrainVal = inputs_Train.copy()
+		inputs_TrainVal.update(inputs_Val)
+		
+		inputs_TrainVal_Label = inputs_Train_Label.copy()
+		inputs_TrainVal_Label.update(inputs_Val_Label)
+		
+		flow_TrainVal = [dict([(id, flow_data.format(id=id, flow_type=flow_type, flow_dir=flow_dir)) for id in Train_keys] + [(id, flow_data.format(id=id, flow_type=flow_type, flow_dir=flow_dir)) for id in Val_keys])  for flow_dir in flow_dirs for flow_type in use_flow] 
+		
+		TrainVal_keys = inputs_TrainVal.keys()
+		shuffle(TrainVal_keys)
+
+
 		if os.path.exists(lmdb_dir):
 			shutil.rmtree(lmdb_dir, ignore_errors=True)
 
@@ -89,6 +102,16 @@ if __name__=='__main__':
 		############################# Creating LMDB for Training Labels ##############################
 		print("Creating Training Label LMDB File ..... ")
 		createLMDBLabel(os.path.join(lmdb_dir,'train-label-lmdb'), int(1e12), inputs_Train_Label, keys=Train_keys, args=args)
+
+
+		############################# Creating LMDB for TrainVal Data ##############################
+		print("Creating TrainVal Data LMDB File ..... ")
+		createLMDBImage(os.path.join(lmdb_dir,'trainval-lmdb'), int(1e13), inputs_TrainVal, flows=flow_TrainVal,  keys=TrainVal_keys, args=args)
+
+		 
+		############################# Creating LMDB for TrainVal Labels ##############################
+		print("Creating TrainVal Label LMDB File ..... ")
+		createLMDBLabel(os.path.join(lmdb_dir,'trainval-label-lmdb'), int(1e12), inputs_TrainVal_Label, keys=TrainVal_keys, args=args)
 
 
 		############################# Creating LMDB for Validation Data ##############################
