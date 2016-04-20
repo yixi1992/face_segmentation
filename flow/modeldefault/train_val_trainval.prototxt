@@ -13,7 +13,7 @@ layer {
 	mean_value: 79.0299827657
   }
   data_param {
-    source: "camvidfmp200200_lmdb/train-lmdb"
+    source: "camvidtrainvalfmp200200_lmdb/trainval-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -26,7 +26,7 @@ layer {
     phase: TRAIN
   }
   data_param {
-    source: "camvidfmp200200_lmdb/train-label-lmdb"
+    source: "camvidtrainvalfmp200200_lmdb/trainval-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -45,7 +45,7 @@ layer {
 	mean_value: 79.0299827657
   }
   data_param {
-    source: "camvidfmp200200_lmdb/val-lmdb"
+    source: "camvidtrainvalfmp200200_lmdb/val-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -58,7 +58,7 @@ layer {
     phase: TEST
   }
   data_param {
-    source: "camvidfmp200200_lmdb/val-label-lmdb"
+    source: "camvidtrainvalfmp200200_lmdb/val-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
