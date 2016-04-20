@@ -14,6 +14,8 @@ layer {
 	mean_value: 128
 	mean_value: 128
 	mean_value: 128
+	mean_value: 128
+	mean_value: 128
  	mean_value: 128
 	mean_value: 128
   }
@@ -47,6 +49,8 @@ layer {
   	mean_value: 78.127565937
 	mean_value: 76.5465853687
 	mean_value: 73.9790552611
+	mean_value: 128
+	mean_value: 128
 	mean_value: 128
 	mean_value: 128
  	mean_value: 128
