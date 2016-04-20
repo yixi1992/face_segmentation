@@ -45,15 +45,15 @@ def LoadLabelPaths(label_path):
 # Mean Intersection over Union
 # http://www.cs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf
 # (1/ncl) \sum_i n_ii / (\sum_j n_ij + \sum_j n_ji - nii)
-def confcount(confcounts, pr, gt):
-	for i in range(0, numclasses):
-		for j in range(0, numclasses):
+def confcount(confcounts, pr, gt, args):
+	for i in range(0, args.numclasses):
+		for j in range(0, args.numclasses):
 			confcounts[i][j] = confcounts[i][j] + np.sum((gt==i) & (pr==j)) 
 	return confcounts
 
-def acc_accumulator(class_acc, pr, gt):
-	for i in range(0, numclasses):
-		class_acc[i+numclasses] += np.sum(gt==i)
+def acc_accumulator(class_acc, pr, gt, args):
+	for i in range(0, args.numclasses):
+		class_acc[i+args.numclasses] += np.sum(gt==i)
 		class_acc[i] += np.sum((gt==i) & (pr==i))
 	return class_acc
 
@@ -68,14 +68,15 @@ def test_accuracy(model_file, image_dict, flows_dict, label_dict, args):
 	labelresizer = None if not args.resize else LabelResizer(args.LabelSize, args.BoxSize, args.nopadding, label_pad_value=args.BackGroundLabel)
 
 	# load net
-	caffe.set_mode_gpu()
-	caffe.set_device(0)
-	net = caffe.Net(deploy_file, model_file, caffe.TEST)
+	if args.use_gpu:
+		caffe.set_mode_gpu()
+		caffe.set_device(0)
+	net = caffe.Net(args.deploy_file, model_file, caffe.TEST)
 	print len(image_dict.keys())
 	
 	for key in image_dict.keys():
 		print key
-		if random.randint(0,7000)>=30:
+		if random.random()>=args.test_ratio:
 			continue
 		img_path = image_dict[key]
 		label_path = label_dict[key]
@@ -87,7 +88,8 @@ def test_accuracy(model_file, image_dict, flows_dict, label_dict, args):
 			in_ = im.astype(np.float32)
 			in_ = in_.transpose((1,2,0))
 			# subtract mean from RGB
-			in_ -= np.array(args.RGB_pad_values, dtype=np.float32)
+			print in_.shape, args.RGB_mean_values+len(flows_dict)*[128]
+			in_ -= np.array(args.RGB_mean_values+len(flows_dict)*[128], dtype=np.float32)
 			in_ = in_.transpose((2,0,1))
 
 			# shape for input (data blob is N x C x H x W), set data
@@ -107,27 +109,27 @@ def test_accuracy(model_file, image_dict, flows_dict, label_dict, args):
 		out = labelresizer.upsample(out, L.shape)
 		out = np.array(out, dtype=np.uint8)
 
-		if eval_metric=='pixel_accuracy':
+		if args.eval_metric=='pixel_accuracy':
 			acc += [np.mean(out==L)]
 			print('{version}_{idx} acc={acc} totalmatch={sum_pixel}'.format(version=v, idx=key, acc=np.mean(out==L), sum_pixel = np.sum(out==L)))
-		elif eval_metric=='class_accuracy':
+		elif args.eval_metric=='class_accuracy':
 			# sum of class accuracy
-			class_acc = acc_accumulator(class_acc, out, L)
-		elif eval_metric=='eval_miu':
+			class_acc = acc_accumulator(class_acc, out, L, args)
+		elif args.eval_metric=='eval_miu':
 			# mIU intersection over union
-			confcounts = confcount(confcounts, out, L)
+			confcounts = confcount(confcounts, out, L, args)
 	
-	if eval_metric=='pixel_accuracy':
+	if args.eval_metric=='pixel_accuracy':
 		print '-----------', 'model_file: ', model_file, '  acc:', np.mean(acc), '-----------'
 		return(np.mean(acc))
-	elif eval_metric=='class_accuracy':
+	elif args.eval_metric=='class_accuracy':
 		print '-----------', 'model_file: ', model_file
 		mean_class_acc = np.divide(class_acc[:args.numclasses], class_acc[args.numclasses:])
 		for i in range(0, args.numclasses):
 			print 'class ', i, 'acc:', mean_class_acc[i]
 		print '------------------------'
 		return(np.mean(mean_class_acc))
-	elif eval_metric=='eval_miu':
+	elif args.eval_metric=='eval_miu':
 		# mIU intersection over union
 		miu = 0
 		miu_cnt = 0

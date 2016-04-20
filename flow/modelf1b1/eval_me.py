@@ -40,12 +40,13 @@ if __name__=='__main__':
 		
 	train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
-	flow_data = '/lustre/yixi/data/CamVid/flow_all/{id}.{flow_dir}.png'
+	flow_data = '/lustre/yixi/data/CamVid/flow_all/flow/{id}.{flow_type}.{flow_dir}.png'
 	
 	
 	
 	
 	args = CArgs()
+	args.use_gpu = False
 	args.resize = resize
 	args.RSize = RSize
 	args.LabelSize = LabelSize
@@ -63,20 +64,24 @@ if __name__=='__main__':
 	args.interested_class = range(0, args.NumLabels)
 	#args.interested_class = [2, 4, 5, 8, 9, 16, 17, 19, 20, 21, 26]
 	args.eval_metric = 'eval_miu'
-	args.RGB_mean_values = (78.1049806452, 76.5400646313, 74.0029471198)
+	args.RGB_mean_values = [78.1049806452, 76.5400646313, 74.0029471198]
 	args.shortcut_inference = True
+	args.deploy_file = deploy_file
 	args.model = model
 	args.snapshot = snapshot
 	args.pred_visual_dir_template = pred_visual_dir_template
 	args.iter = range(59000, 56000, -1000)
-
+	args.test_ratio = 0.1 #will test #test size *0.1 samples
 
 
 
 	inputs_all = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
+	
 	inputs_Train_keys = LMDB2Dict(os.path.join(lmdb_dir,'train-lmdb')).keys()
+	
 	inputs_Test = dict([(i, y) for (i,y) in inputs_all if not (i in inputs_Train_keys)])
 	inputs_Train = dict([(i, y) for (i,y) in inputs_all if (i in inputs_Train_keys)])
+	
 	inputs_Train_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Train])
 	inputs_Test_Label = dict([(id, train_label_data.format(id=id)) for id in inputs_Test])
 
