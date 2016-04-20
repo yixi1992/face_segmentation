@@ -135,8 +135,8 @@ def test_accuracy(model_file, image_dict, flows_dict, label_dict, args):
 		miu_cnt = 0
 		colsum = np.sum(confcounts, 0)
 		rowsum = np.sum(confcounts, 1)
-		for i in range(0, numclasses):
-			if not (i in interested_class):
+		for i in range(0, args.numclasses):
+			if not (i in args.interested_class):
 				continue
 			if (rowsum[i]+colsum[i]-confcounts[i][i]>1e-6):
 				miu2 = float(confcounts[i][i])/float(rowsum[i]+colsum[i]-confcounts[i][i])
@@ -152,7 +152,7 @@ def test_accuracy(model_file, image_dict, flows_dict, label_dict, args):
 
 
 # Plot the accuracy curve and save to file
-def plot_acc(x, y, v):
+def plot_acc(x, y, v, eval_metric):
 	plt.clf()
 	plt.plot(x,y, 'r*-')
 	plt.ylabel(eval_metric)
@@ -170,6 +170,6 @@ def eval(inputs, inputs_flows, inputs_Label, args):
 			os.makedirs(args.pred_visual_dir)
 		
 		acc = acc + [test_accuracy(model_file, inputs, inputs_flows, inputs_Label, args)]
-		plot_acc(args.iter[:(idx+1)], acc, args.dataset_name + '_' + args.model)
+		plot_acc(args.iter[:(idx+1)], acc, args.dataset_name + '_' + args.model, args.eval_metric)
 
 
