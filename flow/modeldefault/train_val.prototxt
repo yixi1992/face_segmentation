@@ -582,6 +582,12 @@ layer {
     num_output: 33
     kernel_size: 1
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'score-pool4' bottom: 'upscore2'
@@ -629,6 +635,12 @@ layer {
     num_output: 33
     kernel_size: 1
     engine: CAFFE
+    weight_filler {
+    	type: "xavier"
+    }
+    bias_filler {
+    	type: "constant"
+    }
   }
 }
 layer { type: 'Crop' name: 'crop' bottom: 'score-pool3' bottom: 'score4'
