@@ -49,9 +49,9 @@ if __name__=='__main__':
 		train_data = '/lustre/yixi/data/CamVid/701_StillsRaw_full/{id}.png'
 	 	train_label_data = '/lustre/yixi/data/CamVid/label/indexedlabel/{id}_L.png'
 	 	flow_data = '/lustre/yixi/data/CamVid/flow_all/flow/{id}.{flow_type}.{flow_dir}.png'
-		train_keys = [line.rstrip('\n') for line in open('/lutre/yixi/data/Camvid/p_train.txt')]
-		val_keys = [line.rstrip('\n') for line in open('/lutre/yixi/data/Camvid/p_val.txt')]
-		test_keys = [line.rstrip('\n') for line in open('/lutre/yixi/data/Camvid/p_test.txt')]
+		train_keys = [line.rstrip('\n') for line in open('/lustre/yixi/data/Camvid/p_train.txt')]
+		val_keys = [line.rstrip('\n') for line in open('/lustre/yixi/data/Camvid/p_val.txt')]
+		test_keys = [line.rstrip('\n') for line in open('/lustre/yixi/data/Camvid/p_test.txt')]
 
 	
 		inputs_all = [(os.path.splitext(os.path.basename(x))[0], x) for x in sorted(glob.glob( train_data.format(id='*')))]
