@@ -1,7 +1,7 @@
 net: "train_val_trainval.prototxt"
 test_iter: 50
 # make test net, but don't invoke it from the solver itself
-test_interval: 10000
+test_interval: 1000
 display: 20
 average_loss: 20
 lr_policy: "fixed"
@@ -14,5 +14,5 @@ iter_size: 1
 max_iter: 80000
 weight_decay: 0.0005 
 snapshot: 1000
-snapshot_prefix: "snapshots_tvtcamvidfmp200200/train_lr1e-10_16000_trainval_lr1e-10/"
+snapshot_prefix: "snapshots_tvtcamvidfmp200200/trainval_lr1e-10/"
 test_initialization: true
