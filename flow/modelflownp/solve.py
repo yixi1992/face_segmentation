@@ -56,14 +56,18 @@ def interp_surgery(net, layers):
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10_19000_38000/_iter_38000.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefault_lr1e-10_19000_38000_38000_1e-11/_iter_38000.caffemodel'
 
-base_weights = 'modeldefaultflow.caffemodel'
+#base_weights = 'modeldefaultflow.caffemodel'
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modelflownp/snapshots_camvid200flow/modeldefaultflowsurg_lr1e-10/_iter_22000.caffemodel'
+
+# for new dataset under segnet trainvaltest split
+base_weights = 'camvid_modelflownp_tvt_surg.caffemodel'
+
 
 # init
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
-solver = caffe.SGDSolver('solver_fmpepic.prototxt')
+solver = caffe.SGDSolver('solver_trainval.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
 #interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
