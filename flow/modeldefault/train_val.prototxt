@@ -6,14 +6,14 @@ layer {
   include {
     phase: TRAIN
   }
- #  Camvid200 Mean
+ #  Camvid300 Mean
   transform_param {
-  	mean_value: 83.0005589237
-	mean_value: 81.5502025204
-	mean_value: 79.0299827657
+  	mean_value: 82.9919054496
+	mean_value: 81.5404659401
+	mean_value: 79.0203549803
   }
   data_param {
-    source: "camvidfmp200200_lmdb/train-lmdb"
+    source: "camvidtrainvalfmp300300_lmdb/train-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -26,7 +26,7 @@ layer {
     phase: TRAIN
   }
   data_param {
-    source: "camvidfmp200200_lmdb/train-label-lmdb"
+    source: "camvidtrainvalfmp300300_lmdb/train-label-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -38,14 +38,14 @@ layer {
   include {
     phase: TEST
   }
- #  Camvid200 Mean
+ #  Camvid300 Mean
   transform_param {
-   	mean_value: 83.0005589237
-	mean_value: 81.5502025204
-	mean_value: 79.0299827657
+   	mean_value: 82.9919054496
+	mean_value: 81.5404659401
+	mean_value: 79.0203549803
   }
   data_param {
-    source: "camvidfmp200200_lmdb/val-lmdb"
+    source: "camvidtrainvalfmp300300_lmdb/val-lmdb"
     batch_size: 1
     backend: LMDB
   }
@@ -58,7 +58,7 @@ layer {
     phase: TEST
   }
   data_param {
-    source: "camvidfmp200200_lmdb/val-label-lmdb"
+    source: "camvidtrainvalfmp300300_lmdb/val-label-lmdb"
     batch_size: 1
     backend: LMDB
   }

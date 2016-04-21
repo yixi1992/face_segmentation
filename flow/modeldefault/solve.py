@@ -42,8 +42,8 @@ def interp_surgery(net, layers):
 #base_weights = '/lustre/yixi/face_segmentation_finetune/flow/modeldefault/snapshots_camvid200200/train_lr1e-10/_iter_77000.caffemodel'
 
 # for new dataset under segnet trainvaltest split
-#base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
-base_weights = 'snapshots_tvtcamvidfmp200200/train_lr1e-10/_iter_16000.caffemodel'
+base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemodel'
+#base_weights = 'snapshots_tvtcamvidfmp200200/train_lr1e-10/_iter_16000.caffemodel'
 
 
 # init
@@ -53,8 +53,8 @@ caffe.set_device(0)
 solver = caffe.SGDSolver('solver.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
-#interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-#interp_surgery(solver.net, interp_layers)
+interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
+interp_surgery(solver.net, interp_layers)
 
 # copy base weights for fine-tuning
 solver.net.copy_from(base_weights)
