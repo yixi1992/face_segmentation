@@ -41,7 +41,7 @@ base_weights = '/lustre/yixi/face_segmentation_finetune/fullconv/VGG16fc.caffemo
 caffe.set_mode_gpu()
 caffe.set_device(0)
 
-solver = caffe.SGDSolver('solver.prototxt')
+solver = caffe.SGDSolver('solver_trainval.prototxt')
 
 # do net surgery to set the deconvolution weights for bilinear interpolation
 interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
