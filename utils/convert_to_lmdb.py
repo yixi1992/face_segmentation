@@ -50,6 +50,7 @@ class Resizer:
 
 class ImageResizer(Resizer):
 	def resize(self, im, padval=None):
+		print im.shape
 		if padval==None:
 			if im.ndim==2:
 				padval = self.flow_pad_value
@@ -62,6 +63,7 @@ class ImageResizer(Resizer):
 
 class LabelResizer(Resizer):
 	def resize(self, im, padval=None):
+		print im.shape
 		pad_im = self.padarray(im, self.label_pad_value)
 		pad_im = Image.fromarray(pad_im)
 		res_im = pad_im.resize(self.size, Image.NEAREST)
@@ -85,6 +87,8 @@ class LabelResizer(Resizer):
 def LoadLabel(filename, resizer=None):
 	im = np.array(Image.open(filename))
 	Dtype = im.dtype
+	print 'input file size='
+	print im.shape
 	
 	if resizer!=None:
 		im = resizer.resize(im)
@@ -94,28 +98,33 @@ def LoadLabel(filename, resizer=None):
 	#print np.amin(im),np.amax(im), im.shape
 	
 	im = im.transpose((2,0,1))
+	print 'loaded and resized image size='
+	print im.shape
 	return im
 
 def LoadImage(filename, flows=[], resizer=None):
-	im = np.array(Image.open(filename))
-	Dtype = im.dtype
-	im = im[:,:,::-1]	# reverse channels of image data
+	im = None
+	Dtype = np.uint8
+	if filename!=None:
+		im = np.array(Image.open(filename))
+		print 'input file size='
+		print im.shape
+		Dtype = im.dtype
+		im = im[:,:,::-1]	# reverse channels of image data
+		if resizer!=None:
+			im = resizer.resize(im)
 	
 	for flow in flows:
 		flow_im = np.array(Image.open(flow))
+		if resizer!=None:
+			flow_im = resizer.resize(flow_im)
 		flow_im = np.reshape(flow_im, (flow_im.shape[0], flow_im.shape[1], 1))
-		im = np.concatenate((im, flow_im), axis=2)
-	
-	if resizer!=None:
-		im_res = resizer.resize(im[:,:,:3])
-		for i in range(3, im.shape[2]):
-			flow_im_res = resizer.resize(im[:,:,i])
-			flow_im_res = np.reshape(flow_im_res, (flow_im_res.shape[0], flow_im_res.shape[1], 1))
-			im_res = np.concatenate((im_res, flow_im_res), axis=2)
-		im = im_res
-		
+		im = np.concatenate((im, flow_im), axis=2) if im!=None else flow_im
+			
 	im = np.array(im,Dtype)
 	im = im.transpose((2,0,1))
+	print 'loaded and resized image size='
+	print im.shape
 	# shape channels*width*height, e.g. 3*640*420
 	return im
 
@@ -142,20 +151,21 @@ def createLMDBImage(dir, mapsize, inputs_Train, flows=[], keys=None, args=None):
 	if os.path.exists(dir):
 		shutil.rmtree(dir, ignore_errors=True)
 	in_db = lmdb.open(dir, map_size=mapsize)
-	RGB_sum = np.zeros(3 + len(flows))
+	RGB_sum = np.zeros((3 if inputs_Train!=None else 0) + len(flows))
 	resizer = None if not args.resize else ImageResizer(args.RSize, args.BoxSize, args.nopadding, args.RGB_pad_values, args.flow_pad_value)
 	with in_db.begin(write=True) as in_txn:
 		for (in_idx, key) in enumerate(keys):
 			print dir, in_idx
 #			if in_idx%args.proc_size!=args.proc_rank:
 #				continue
-			in_ = inputs_Train[key]
+			in_ = inputs_Train[key] if inputs_Train!=None and key in inputs_Train else None
 			im = LoadImage(in_, [flow[key] for flow in flows], resizer)
 			RGB_sum = RGB_sum + np.mean(im, axis=(1,2))
 			im_dat = caffe.io.array_to_datum(im)
 			in_txn.put(str(in_idx),im_dat.SerializeToString())
 			print dir, in_idx, im.shape, RGB_sum/(in_idx+1)
 	in_db.close()
+	
 	f = open(os.path.join(dir, 'RGB_mean'), 'w')
 	RGB_mean = RGB_sum/len(keys)
 	for i in range(RGB_mean.size):
@@ -163,5 +173,10 @@ def createLMDBImage(dir, mapsize, inputs_Train, flows=[], keys=None, args=None):
 	for i in range(RGB_mean.size):
 		f.write(str(RGB_mean[i]) + ', ')
 	f.write('\n')
+	f.close()
+
+	f = open(os.path.join(dir, 'keys'), 'w')
+	for (in_idx, key) in enumerate(keys):
+		f.write(key + '\n')
 	f.close()
 
